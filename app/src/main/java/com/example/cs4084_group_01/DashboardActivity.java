@@ -12,6 +12,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.android.material.button.MaterialButton;
 
 public class DashboardActivity extends AppCompatActivity {
     private UserManager userManager;
@@ -46,6 +47,13 @@ public class DashboardActivity extends AppCompatActivity {
         editProfileButton = findViewById(R.id.editProfileButton);
         editProfileButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        });
+
+        // Setup water tracking button
+        MaterialButton waterTrackingButton = findViewById(R.id.waterTrackingButton);
+        waterTrackingButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, WaterTrackingActivity.class);
             startActivity(intent);
         });
     }
