@@ -32,6 +32,10 @@
         <activity
             android:name=".DashboardActivity"
             android:exported="false" />
+        <activity
+            android:name=".WaterTrackingActivity"
+            android:exported="false"
+            android:label="Water Tracking" />
     </application>
 
 </manifest>

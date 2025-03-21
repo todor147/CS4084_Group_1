@@ -15,7 +15,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:titleTextColor="?attr/colorOnPrimary"
-            app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+            app:title="Water Intake"
             android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"/>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -31,6 +31,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Today's Progress Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -46,44 +47,62 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Profile Information"
+                        android:text="Today's Progress"
                         android:textAppearance="?attr/textAppearanceHeadline6"
                         android:layout_marginBottom="16dp"/>
 
-                    <TextView
-                        android:id="@+id/ageText"
-                        android:layout_width="wrap_content"
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/waterProgressBar"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Not set"/>
+                        android:layout_marginBottom="8dp"
+                        app:trackThickness="8dp"/>
 
                     <TextView
-                        android:id="@+id/heightText"
+                        android:id="@+id/waterProgressText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Not set"/>
+                        android:layout_gravity="center"
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:text="0.0 L / 2.0 L"/>
 
-                    <TextView
-                        android:id="@+id/weightText"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Not set"/>
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="16dp">
 
-                    <TextView
-                        android:id="@+id/genderText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Not set"/>
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/decrementButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-"
+                            android:textSize="24sp"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
-                    <TextView
-                        android:id="@+id/activityLevelText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Not set"/>
+                        <TextView
+                            android:id="@+id/glassCountText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 glasses"
+                            android:textAppearance="?attr/textAppearanceHeadline6"
+                            android:layout_marginHorizontal="24dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/incrementButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+"
+                            android:textSize="24sp"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Goal Setting Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -99,27 +118,31 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Water Tracking"
+                        android:text="Daily Goal"
                         android:textAppearance="?attr/textAppearanceHeadline6"
-                        android:layout_marginBottom="8dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Track your daily water intake and stay hydrated"
-                        android:textAppearance="?attr/textAppearanceBody2"
                         android:layout_marginBottom="16dp"/>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/waterTrackingButton"
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/goalSlider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="1.0"
+                        android:valueTo="4.0"
+                        android:stepSize="0.5"/>
+
+                    <TextView
+                        android:id="@+id/goalText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Track Water Intake"/>
+                        android:layout_gravity="center"
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:text="Goal: 2.0 L"/>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- History Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -134,27 +157,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="BMI Information"
+                        android:text="History"
                         android:textAppearance="?attr/textAppearanceHeadline6"
                         android:layout_marginBottom="16dp"/>
 
-                    <TextView
-                        android:id="@+id/bmiValueText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Not calculated"/>
-
-                    <TextView
-                        android:id="@+id/bmiCategoryText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Not set"/>
-
-                    <TextView
-                        android:id="@+id/bmiDescriptionText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Not set"/>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/historyRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
 
                 </LinearLayout>
 
@@ -163,13 +173,5 @@
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/editProfileButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_menu_edit"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 
