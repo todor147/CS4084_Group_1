@@ -2,25 +2,20 @@ package com.example.cs4084_group_01;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-
-import com.example.cs4084_group_01.viewmodel.ProfileViewModel;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.chip.ChipGroup;
+import com.example.cs4084_group_01.viewmodel.ProfileViewModel;
 
 public class ProfileActivity extends AppCompatActivity {
     private ProfileViewModel viewModel;
-    private TextInputEditText ageInput;
-    private TextInputEditText heightInput;
-    private TextInputEditText weightInput;
-    private AutoCompleteTextView genderDropdown;
-    private AutoCompleteTextView activityLevelDropdown;
-    private MaterialButton saveButton;
+    private TextInputEditText ageInput, heightInput, weightInput;
+    private ChipGroup genderGroup, activityGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,72 +23,99 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
-        initializeViews();
-        setupDropdowns();
-        observeViewModel();
-        setupSaveButton();
-    }
 
-    private void initializeViews() {
-        // Basic Information
+        // Initialize views
         ageInput = findViewById(R.id.ageInput);
         heightInput = findViewById(R.id.heightInput);
         weightInput = findViewById(R.id.weightInput);
-        genderDropdown = findViewById(R.id.genderDropdown);
-        activityLevelDropdown = findViewById(R.id.activityLevelDropdown);
-        saveButton = findViewById(R.id.saveButton);
-    }
+        genderGroup = findViewById(R.id.genderGroup);
+        activityGroup = findViewById(R.id.activityGroup);
+        Button saveButton = findViewById(R.id.saveButton);
 
-    private void setupDropdowns() {
-        // Setup gender dropdown
-        String[] genders = new String[]{"Male", "Female", "Other"};
-        ArrayAdapter<String> genderAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, genders);
-        genderDropdown.setAdapter(genderAdapter);
-
-        // Setup activity level dropdown
-        String[] activityLevels = new String[]{"Sedentary", "Light", "Moderate", "Very Active"};
-        ArrayAdapter<String> activityAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, activityLevels);
-        activityLevelDropdown.setAdapter(activityAdapter);
-    }
-
-    private void observeViewModel() {
+        // Load existing profile data
+        viewModel.loadProfile();
         viewModel.getProfileLiveData().observe(this, profile -> {
             if (profile != null) {
                 ageInput.setText(String.valueOf(profile.getAge()));
                 heightInput.setText(String.valueOf(profile.getHeight()));
                 weightInput.setText(String.valueOf(profile.getWeight()));
-                genderDropdown.setText(profile.getGender(), false);
-                activityLevelDropdown.setText(profile.getActivityLevel(), false);
+                // Set gender and activity level chips
+                if (profile.getGender() != null) {
+                    int genderChipId = getGenderChipId(profile.getGender());
+                    if (genderChipId != View.NO_ID) {
+                        genderGroup.check(genderChipId);
+                    }
+                }
+                if (profile.getActivityLevel() != null) {
+                    int activityChipId = getActivityChipId(profile.getActivityLevel());
+                    if (activityChipId != View.NO_ID) {
+                        activityGroup.check(activityChipId);
+                    }
+                }
             }
         });
-    }
 
-    private void setupSaveButton() {
         saveButton.setOnClickListener(v -> saveProfile());
     }
 
     private void saveProfile() {
-        try {
-            int age = Integer.parseInt(ageInput.getText().toString());
-            float height = Float.parseFloat(heightInput.getText().toString());
-            float weight = Float.parseFloat(weightInput.getText().toString());
-            String gender = genderDropdown.getText().toString();
-            String activityLevel = activityLevelDropdown.getText().toString();
+        // Get input values
+        String ageStr = ageInput.getText().toString();
+        String heightStr = heightInput.getText().toString();
+        String weightStr = weightInput.getText().toString();
 
-            viewModel.saveProfile(age, height, weight, gender, activityLevel);
-
-            // Show success message
-            Toast.makeText(this, "Profile saved successfully!", Toast.LENGTH_SHORT).show();
-
-            // Navigate to dashboard
-            Intent intent = new Intent(this, DashboardActivity.class);
-            startActivity(intent);
-            finish(); // This closes the profile activity so user can't go back to it using back button
-        } catch (NumberFormatException e) {
-            // Show error message if number parsing fails
-            Toast.makeText(this, "Please enter valid numbers for age, height, and weight", Toast.LENGTH_LONG).show();
+        // Validate inputs
+        if (ageStr.isEmpty() || heightStr.isEmpty() || weightStr.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        int age = Integer.parseInt(ageStr);
+        float height = Float.parseFloat(heightStr);
+        float weight = Float.parseFloat(weightStr);
+
+        // Get selected gender and activity level
+        String gender = getSelectedGender();
+        String activityLevel = getSelectedActivityLevel();
+
+        // Save profile
+        viewModel.saveProfile(age, height, weight, gender, activityLevel);
+
+        // Navigate to Dashboard
+        Intent intent = new Intent(this, DashboardActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private String getSelectedGender() {
+        int selectedChipId = genderGroup.getCheckedChipId();
+        if (selectedChipId == View.NO_ID) return null;
+        return findViewById(selectedChipId).getTag().toString();
+    }
+
+    private String getSelectedActivityLevel() {
+        int selectedChipId = activityGroup.getCheckedChipId();
+        if (selectedChipId == View.NO_ID) return null;
+        return findViewById(selectedChipId).getTag().toString();
+    }
+
+    private int getGenderChipId(String gender) {
+        for (int i = 0; i < genderGroup.getChildCount(); i++) {
+            View child = genderGroup.getChildAt(i);
+            if (child.getTag().toString().equals(gender)) {
+                return child.getId();
+            }
+        }
+        return View.NO_ID;
+    }
+
+    private int getActivityChipId(String activityLevel) {
+        for (int i = 0; i < activityGroup.getChildCount(); i++) {
+            View child = activityGroup.getChildAt(i);
+            if (child.getTag().toString().equals(activityLevel)) {
+                return child.getId();
+            }
+        }
+        return View.NO_ID;
     }
 } 

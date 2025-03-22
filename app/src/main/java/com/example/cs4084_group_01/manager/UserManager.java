@@ -3,20 +3,29 @@ package com.example.cs4084_group_01.manager;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.cs4084_group_01.UserProfile;
+import com.example.cs4084_group_01.model.UserProfile;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserManager {
-    private static final String PREF_NAME = "UserPrefs";
+    private static final String PREF_NAME = "UserManagerPrefs";
     private static final String KEY_USERS = "users";
-    private static final String KEY_CURRENT_USER = "current_user";
+    private static final String KEY_CURRENT_USER = "currentUser";
+    private static final String KEY_USER_PROFILES = "userProfiles";
     private static UserManager instance;
     private final SharedPreferences preferences;
     private final Gson gson;
+    private final Map<String, UserProfile> userProfiles;
 
     private UserManager(Context context) {
         preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         gson = new Gson();
+        userProfiles = new HashMap<>();
+        loadUserProfiles();
     }
 
     public static synchronized UserManager getInstance(Context context) {
@@ -26,6 +35,20 @@ public class UserManager {
         return instance;
     }
 
+    private void loadUserProfiles() {
+        String profilesJson = preferences.getString(KEY_USER_PROFILES, "{}");
+        Type type = new TypeToken<Map<String, UserProfile>>(){}.getType();
+        Map<String, UserProfile> loadedProfiles = gson.fromJson(profilesJson, type);
+        if (loadedProfiles != null) {
+            userProfiles.putAll(loadedProfiles);
+        }
+    }
+
+    private void saveUserProfiles() {
+        String profilesJson = gson.toJson(userProfiles);
+        preferences.edit().putString(KEY_USER_PROFILES, profilesJson).apply();
+    }
+
     public boolean registerUser(String username, String password, String email) {
         if (username == null || password == null || email == null ||
                 username.isEmpty() || password.isEmpty() || email.isEmpty()) {
@@ -33,9 +56,8 @@ public class UserManager {
         }
 
         String usersJson = preferences.getString(KEY_USERS, "{}");
-        java.util.Map<String, UserCredentials> users = gson.fromJson(usersJson,
-                new com.google.gson.reflect.TypeToken<java.util.Map<String, UserCredentials>>() {
-                }.getType());
+        Type type = new TypeToken<Map<String, UserCredentials>>(){}.getType();
+        Map<String, UserCredentials> users = gson.fromJson(usersJson, type);
 
         if (users.containsKey(username)) {
             return false;
@@ -59,9 +81,8 @@ public class UserManager {
         }
 
         String usersJson = preferences.getString(KEY_USERS, "{}");
-        java.util.Map<String, UserCredentials> users = gson.fromJson(usersJson,
-                new com.google.gson.reflect.TypeToken<java.util.Map<String, UserCredentials>>() {
-                }.getType());
+        Type type = new TypeToken<Map<String, UserCredentials>>(){}.getType();
+        Map<String, UserCredentials> users = gson.fromJson(usersJson, type);
 
         UserCredentials credentials = users.get(username);
         if (credentials != null && credentials.password.equals(password)) {
@@ -73,7 +94,7 @@ public class UserManager {
         return false;
     }
 
-    public void logoutUser() {
+    public void logout() {
         preferences.edit()
                 .remove(KEY_CURRENT_USER)
                 .apply();
@@ -84,16 +105,12 @@ public class UserManager {
     }
 
     public void saveUserProfile(String username, UserProfile profile) {
-        if (username == null || profile == null) return;
-        preferences.edit()
-                .putString("profile_" + username, gson.toJson(profile))
-                .apply();
+        userProfiles.put(username, profile);
+        saveUserProfiles();
     }
 
     public UserProfile getUserProfile(String username) {
-        if (username == null) return null;
-        String profileJson = preferences.getString("profile_" + username, null);
-        return profileJson != null ? gson.fromJson(profileJson, UserProfile.class) : null;
+        return userProfiles.get(username);
     }
 
     private static class UserCredentials {

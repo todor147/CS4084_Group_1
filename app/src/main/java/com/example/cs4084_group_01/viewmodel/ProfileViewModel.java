@@ -6,7 +6,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.cs4084_group_01.UserProfile;
+import com.example.cs4084_group_01.model.UserProfile;
 import com.example.cs4084_group_01.manager.UserManager;
 import com.example.cs4084_group_01.repository.ProfileRepository;
 
@@ -27,9 +27,13 @@ public class ProfileViewModel extends AndroidViewModel {
         loadProfile();
     }
 
-    private void loadProfile() {
-        UserProfile profile = repository.getProfile();
-        profileLiveData.setValue(profile);
+    public void loadProfile() {
+        // Get profile from UserManager for user-specific profiles
+        String currentUser = userManager.getCurrentUser();
+        if (currentUser != null) {
+            UserProfile profile = userManager.getUserProfile(currentUser);
+            profileLiveData.setValue(profile);
+        }
     }
 
     public void saveProfile(int age, float height, float weight, String gender, String activityLevel) {
@@ -39,7 +43,13 @@ public class ProfileViewModel extends AndroidViewModel {
         profile.setWeight(weight);
         profile.setGender(gender);
         profile.setActivityLevel(activityLevel);
+
+        // Save to both repository and UserManager
         repository.saveProfile(profile);
+        String currentUser = userManager.getCurrentUser();
+        if (currentUser != null) {
+            userManager.saveUserProfile(currentUser, profile);
+        }
         profileLiveData.setValue(profile);
     }
 
@@ -58,26 +68,19 @@ public class ProfileViewModel extends AndroidViewModel {
     public void deleteProfile() {
         isLoading.setValue(true);
         repository.deleteProfile();
+        String currentUser = userManager.getCurrentUser();
+        if (currentUser != null) {
+            userManager.saveUserProfile(currentUser, null);
+        }
         profileLiveData.setValue(null);
         isLoading.setValue(false);
     }
 
     public boolean hasProfile() {
-        return repository.hasProfile();
-    }
-
-    public void createProfile(int age, float height, float weight, String gender, String activityLevel) {
-        UserProfile profile = new UserProfile();
-        profile.setAge(age);
-        profile.setHeight(height);
-        profile.setWeight(weight);
-        profile.setGender(gender);
-        profile.setActivityLevel(activityLevel);
-
-        // Get current user and save profile
         String currentUser = userManager.getCurrentUser();
         if (currentUser != null) {
-            userManager.saveUserProfile(currentUser, profile);
+            return userManager.getUserProfile(currentUser) != null;
         }
+        return false;
     }
 } 

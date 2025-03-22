@@ -29,7 +29,21 @@ public class UserProfile {
     private float waterIntakeGoal; // in liters
 
     public UserProfile() {
+        // Initialize with empty/default values
+        this.age = 0;
+        this.height = 0.0f;
+        this.weight = 0.0f;
+        this.gender = null;
+        this.activityLevel = null;
         this.lastUpdated = new Date();
+    }
+
+    public UserProfile(int age, float height, float weight, String gender, String activityLevel) {
+        this.age = age;
+        this.height = height;
+        this.weight = weight;
+        this.gender = gender;
+        this.activityLevel = activityLevel;
     }
 
     // Getters and Setters
@@ -168,17 +182,28 @@ public class UserProfile {
 
     // Utility Methods
     public float calculateBMI() {
-        if (height <= 0) return 0;
-        float heightInMeters = height / 100.0f;
+        if (height <= 0 || weight <= 0) {
+            return 0;
+        }
+        // Convert height from cm to meters
+        float heightInMeters = height / 100;
+        // Calculate BMI using the formula: weight / (height^2)
         return weight / (heightInMeters * heightInMeters);
     }
 
     public String getBMICategory() {
         float bmi = calculateBMI();
-        if (bmi < 18.5) return "Underweight";
-        if (bmi < 25) return "Normal";
-        if (bmi < 30) return "Overweight";
-        return "Obese";
+        if (bmi <= 0) {
+            return "Not calculated";
+        } else if (bmi < 18.5) {
+            return "Underweight";
+        } else if (bmi < 25) {
+            return "Normal";
+        } else if (bmi < 30) {
+            return "Overweight";
+        } else {
+            return "Obese";
+        }
     }
 
     public String getBloodPressureCategory() {

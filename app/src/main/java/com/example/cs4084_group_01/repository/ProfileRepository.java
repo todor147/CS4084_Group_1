@@ -2,8 +2,7 @@ package com.example.cs4084_group_01.repository;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import com.example.cs4084_group_01.UserProfile;
+import com.example.cs4084_group_01.model.UserProfile;
 import com.google.gson.Gson;
 
 public class ProfileRepository {

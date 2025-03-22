@@ -1,6 +1,5 @@
 package com.example.cs4084_group_01;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -21,10 +20,5 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-        // Start the profile activity
-        Intent intent = new Intent(this, ProfileActivity.class);
-        startActivity(intent);
-        finish(); // Close MainActivity so user can't go back to it
     }
 }
