@@ -2,6 +2,7 @@ package com.example.cs4084_group_01;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +34,13 @@ public class DashboardActivity extends AppCompatActivity {
         FloatingActionButton editButton = findViewById(R.id.editProfileButton);
         editButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        });
+
+        // Setup mood selection button
+        Button moodSelectionButton = findViewById(R.id.moodSelectionButton);
+        moodSelectionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MoodSelection.class);
             startActivity(intent);
         });
 

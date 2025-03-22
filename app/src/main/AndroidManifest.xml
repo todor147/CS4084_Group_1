@@ -31,6 +31,10 @@
             android:name=".DashboardActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".MoodSelection"
+            android:exported="false" />
+
     </application>
 
 </manifest>
