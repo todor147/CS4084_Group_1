@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.example.cs4084_group_01.manager.UserManager;
@@ -47,6 +50,13 @@ public class DashboardActivity extends AppCompatActivity {
         editProfileButton = findViewById(R.id.editProfileButton);
         editProfileButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        });
+
+        // Setup mood selection button
+        Button moodSelectionButton = findViewById(R.id.moodSelectionButton);
+        moodSelectionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MoodSelection.class);
             startActivity(intent);
         });
 
