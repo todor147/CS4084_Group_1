@@ -26,18 +26,16 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.example.cs4084_group_01.adapter.StepHistoryAdapter;
 import com.example.cs4084_group_01.model.StepData;
 import com.example.cs4084_group_01.repository.StepDataRepository;
+import com.example.cs4084_group_01.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class StepCounterActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1001;
     public static final String PREFS_NAME = "StepCounterPrefs";
     public static final String KEY_STEP_GOAL = "step_goal";
-    private static final String BROADCAST_ACTION = "com.example.cs4084_group_01.STEP_COUNTER_UPDATE";
-    private static final String EXTRA_STEP_COUNT = "step_count";
 
     private TextView stepCountText;
     private TextView goalText;
@@ -53,8 +51,8 @@ public class StepCounterActivity extends AppCompatActivity {
     private final BroadcastReceiver stepUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BROADCAST_ACTION)) {
-                currentSteps = intent.getIntExtra(EXTRA_STEP_COUNT, 0);
+            if (Constants.ACTION_STEP_COUNTER_UPDATE.equals(intent.getAction())) {
+                currentSteps = intent.getIntExtra(Constants.EXTRA_STEP_COUNT, 0);
                 updateUI();
                 updateHistoryView();
             }
@@ -69,9 +67,12 @@ public class StepCounterActivity extends AppCompatActivity {
         // Set up toolbar with back button
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
+        // Initialize repositories and preferences
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         stepGoal = prefs.getInt(KEY_STEP_GOAL, 10000);
         repository = StepDataRepository.getInstance(this);
@@ -81,7 +82,6 @@ public class StepCounterActivity extends AppCompatActivity {
         setupHistoryView();
         checkAndRequestPermissions();
         updateUI();
-        updateHistoryView();
     }
 
     private void initializeViews() {
@@ -97,7 +97,13 @@ public class StepCounterActivity extends AppCompatActivity {
     }
     
     private void setupHistoryView() {
-        historyAdapter = new StepHistoryAdapter(new ArrayList<>());
+        // Initialize with current data instead of an empty list
+        List<StepData> history = repository.getStepHistory();
+        
+        // Sort by date (newest first)
+        Collections.sort(history, (a, b) -> b.getDate().compareTo(a.getDate()));
+        
+        historyAdapter = new StepHistoryAdapter(history);
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         historyRecyclerView.setAdapter(historyAdapter);
     }
@@ -226,14 +232,12 @@ public class StepCounterActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Register for step updates
+        // Register for step updates with proper flags for Android 14+
+        IntentFilter filter = new IntentFilter(Constants.ACTION_STEP_COUNTER_UPDATE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // Android 14+ requires export flag
-            registerReceiver(stepUpdateReceiver, new IntentFilter(BROADCAST_ACTION), 
-                    Context.RECEIVER_NOT_EXPORTED);
+            registerReceiver(stepUpdateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
         } else {
-            // For older Android versions
-            registerReceiver(stepUpdateReceiver, new IntentFilter(BROADCAST_ACTION));
+            registerReceiver(stepUpdateReceiver, filter);
         }
         
         // Update UI on resume
@@ -248,7 +252,7 @@ public class StepCounterActivity extends AppCompatActivity {
         try {
             unregisterReceiver(stepUpdateReceiver);
         } catch (IllegalArgumentException e) {
-            // Receiver not registered
+            // Receiver not registered - ignore
         }
     }
 

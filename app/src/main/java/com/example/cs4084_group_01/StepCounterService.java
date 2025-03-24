@@ -14,27 +14,28 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.util.Log;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.example.cs4084_group_01.model.StepData;
 import com.example.cs4084_group_01.repository.StepDataRepository;
+import com.example.cs4084_group_01.util.Constants;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class StepCounterService extends Service implements SensorEventListener {
-    private static final int NOTIFICATION_ID = 1001;
-    private static final String CHANNEL_ID = "step_counter_channel";
-    private static final String BROADCAST_ACTION = "com.example.cs4084_group_01.STEP_COUNTER_UPDATE";
-    private static final String EXTRA_STEP_COUNT = "step_count";
-
+    private static final String TAG = "StepCounterService";
+    private static final long WAKE_LOCK_TIMEOUT = TimeUnit.HOURS.toMillis(1); // 1 hour timeout
+    
     private SensorManager sensorManager;
     private Sensor stepSensor;
     private PowerManager.WakeLock wakeLock;
     private int initialSteps = -1;
     private int currentSteps = 0;
     private StepDataRepository repository;
-
+    private boolean sensorAvailable = false;
+    
     @Override
     public void onCreate() {
         super.onCreate();
@@ -43,15 +44,22 @@ public class StepCounterService extends Service implements SensorEventListener {
         
         // Initialize sensors
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        stepSensor = sensorManager != null ? sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) : null;
+        sensorAvailable = (stepSensor != null);
+        
+        if (!sensorAvailable) {
+            Log.w(TAG, "Step sensor not available on this device");
+        }
         
         // Load saved steps
         currentSteps = repository.getCurrentSteps();
         
-        // Create wake lock to keep service running
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "StepCounter::WakeLock");
-        wakeLock.acquire();
+        // Create wake lock with timeout
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (powerManager != null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Constants.STEP_COUNTER_WAKE_LOCK_TAG);
+            wakeLock.setReferenceCounted(false);
+        }
         
         // Create notification channel for Android 8.0+
         createNotificationChannel();
@@ -59,13 +67,19 @@ public class StepCounterService extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Acquire wake lock with timeout
+        if (wakeLock != null && !wakeLock.isHeld()) {
+            wakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        }
+        
         // Register step counter listener
-        if (stepSensor != null) {
+        if (sensorAvailable) {
             sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            Log.d(TAG, "Step counter sensor registered");
         }
         
         // Start as a foreground service with notification
-        startForeground(NOTIFICATION_ID, createNotification());
+        startForeground(Constants.STEP_COUNTER_NOTIFICATION_ID, createNotification());
         
         return START_STICKY;
     }
@@ -75,12 +89,16 @@ public class StepCounterService extends Service implements SensorEventListener {
         // Unregister sensor listener
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
+            Log.d(TAG, "Step counter sensor unregistered");
+        }
+        
+        // Release wake lock if held
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+            Log.d(TAG, "Wake lock released");
         }
         
         super.onDestroy();
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
     }
 
     @Override
@@ -96,6 +114,7 @@ public class StepCounterService extends Service implements SensorEventListener {
             // Initialize steps on first reading
             if (initialSteps == -1) {
                 initialSteps = totalSteps;
+                Log.d(TAG, "Initialized step counter with base value: " + initialSteps);
             }
             
             // Calculate steps since service started
@@ -111,8 +130,8 @@ public class StepCounterService extends Service implements SensorEventListener {
             repository.saveStepData(todayData);
             
             // Broadcast step update
-            Intent intent = new Intent(BROADCAST_ACTION);
-            intent.putExtra(EXTRA_STEP_COUNT, stepsToday);
+            Intent intent = new Intent(Constants.ACTION_STEP_COUNTER_UPDATE);
+            intent.putExtra(Constants.EXTRA_STEP_COUNT, stepsToday);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 // Set the package to make it explicit for Android 13+
                 intent.setPackage(getPackageName());
@@ -122,25 +141,32 @@ public class StepCounterService extends Service implements SensorEventListener {
             // Update notification
             NotificationManager notificationManager = 
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(NOTIFICATION_ID, createNotification());
+            if (notificationManager != null) {
+                notificationManager.notify(Constants.STEP_COUNTER_NOTIFICATION_ID, createNotification());
+            }
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Not needed for this implementation
+        // Log accuracy changes but no action needed
+        if (sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+            Log.d(TAG, "Step sensor accuracy changed to: " + accuracy);
+        }
     }
     
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
+                    Constants.STEP_COUNTER_CHANNEL_ID,
                     "Step Counter Service",
                     NotificationManager.IMPORTANCE_LOW);
             channel.setDescription("Shows current step count");
             
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
     
@@ -149,7 +175,7 @@ public class StepCounterService extends Service implements SensorEventListener {
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.STEP_COUNTER_CHANNEL_ID)
                 .setContentTitle("Step Counter")
                 .setContentText(currentSteps + " steps today")
                 .setSmallIcon(R.drawable.ic_directions_walk)
