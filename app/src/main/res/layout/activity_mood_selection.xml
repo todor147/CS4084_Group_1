@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="How are you feeling?"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:layout_marginBottom="16dp"/>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/moodGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:singleSelection="true"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/moodVeryHappy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Very Happy"
+            android:checkable="true"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/moodHappy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Happy"
+            android:checkable="true"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/moodNeutral"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Neutral"
+            android:checkable="true"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/moodSad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sad"
+            android:checkable="true"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/moodVerySad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Very Sad"
+            android:checkable="true"/>
+    </com.google.android.material.chip.ChipGroup>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Notes (optional)"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/notesField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:minLines="3"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <CalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/moodListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Mood"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout> 
