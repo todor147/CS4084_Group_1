@@ -2,124 +2,127 @@ package com.example.cs4084_group_01.manager;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import com.example.cs4084_group_01.model.UserProfile;
+import com.example.cs4084_group_01.model.User;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserManager {
-    private static final String PREF_NAME = "UserManagerPrefs";
-    private static final String KEY_USERS = "users";
+    private static final String PREF_NAME = "UserPrefs";
     private static final String KEY_CURRENT_USER = "currentUser";
-    private static final String KEY_USER_PROFILES = "userProfiles";
+    private static final String KEY_USER_CREDENTIALS = "user_credentials";
     private static UserManager instance;
-    private final SharedPreferences preferences;
-    private final Gson gson;
-    private final Map<String, UserProfile> userProfiles;
+    private SharedPreferences prefs;
+    private Gson gson;
 
     private UserManager(Context context) {
-        preferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         gson = new Gson();
-        userProfiles = new HashMap<>();
-        loadUserProfiles();
     }
 
-    public static synchronized UserManager getInstance(Context context) {
+    public static UserManager getInstance(Context context) {
         if (instance == null) {
             instance = new UserManager(context.getApplicationContext());
         }
         return instance;
     }
 
-    private void loadUserProfiles() {
-        String profilesJson = preferences.getString(KEY_USER_PROFILES, "{}");
-        Type type = new TypeToken<Map<String, UserProfile>>(){}.getType();
-        Map<String, UserProfile> loadedProfiles = gson.fromJson(profilesJson, type);
-        if (loadedProfiles != null) {
-            userProfiles.putAll(loadedProfiles);
-        }
+    public void saveUser(User user) {
+        String userJson = gson.toJson(user);
+        prefs.edit().putString(KEY_CURRENT_USER, userJson).apply();
     }
 
-    private void saveUserProfiles() {
-        String profilesJson = gson.toJson(userProfiles);
-        preferences.edit().putString(KEY_USER_PROFILES, profilesJson).apply();
+    public User getCurrentUser() {
+        String userJson = prefs.getString(KEY_CURRENT_USER, null);
+        if (userJson != null) {
+            return gson.fromJson(userJson, User.class);
+        }
+        return null;
     }
 
-    public boolean registerUser(String username, String password, String email) {
-        if (username == null || password == null || email == null ||
-                username.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            return false;
-        }
-
-        String usersJson = preferences.getString(KEY_USERS, "{}");
-        Type type = new TypeToken<Map<String, UserCredentials>>(){}.getType();
-        Map<String, UserCredentials> users = gson.fromJson(usersJson, type);
-
-        if (users.containsKey(username)) {
-            return false;
-        }
-
-        users.put(username, new UserCredentials(password, email));
-        preferences.edit()
-                .putString(KEY_USERS, gson.toJson(users))
-                .apply();
-
-        // Create an empty profile for the new user
-        saveUserProfile(username, new UserProfile());
-
-        return true;
+    public void logoutUser() {
+        prefs.edit().remove(KEY_CURRENT_USER).apply();
     }
 
-    public boolean loginUser(String username, String password) {
-        if (username == null || password == null ||
-                username.isEmpty() || password.isEmpty()) {
-            return false;
+    public boolean isUserLoggedIn() {
+        return getCurrentUser() != null;
+    }
+
+    public void saveUserProfile(User user) {
+        String userJson = gson.toJson(user);
+        prefs.edit().putString(KEY_CURRENT_USER, userJson).apply();
+    }
+
+    public User getUserProfile() {
+        String userJson = prefs.getString(KEY_CURRENT_USER, null);
+        if (userJson != null) {
+            return gson.fromJson(userJson, User.class);
         }
+        return null;
+    }
 
-        String usersJson = preferences.getString(KEY_USERS, "{}");
-        Type type = new TypeToken<Map<String, UserCredentials>>(){}.getType();
-        Map<String, UserCredentials> users = gson.fromJson(usersJson, type);
+    public void saveUserCredentials(UserCredentials credentials) {
+        String credentialsJson = gson.toJson(credentials);
+        prefs.edit().putString(KEY_USER_CREDENTIALS, credentialsJson).apply();
+    }
 
-        UserCredentials credentials = users.get(username);
-        if (credentials != null && credentials.password.equals(password)) {
-            preferences.edit()
-                    .putString(KEY_CURRENT_USER, username)
-                    .apply();
-            return true;
+    public UserCredentials getUserCredentials() {
+        String credentialsJson = prefs.getString(KEY_USER_CREDENTIALS, null);
+        if (credentialsJson != null) {
+            return gson.fromJson(credentialsJson, UserCredentials.class);
+        }
+        return null;
+    }
+
+    public boolean loginUser(String email, String password) {
+        UserCredentials credentials = getUserCredentials();
+        if (credentials != null && credentials.email.equals(email) && credentials.password.equals(password)) {
+            // Load user profile
+            String userJson = prefs.getString(KEY_CURRENT_USER, null);
+            if (userJson != null) {
+                saveUser(gson.fromJson(userJson, User.class));
+                return true;
+            }
         }
         return false;
     }
 
-    public void logout() {
-        preferences.edit()
-                .remove(KEY_CURRENT_USER)
-                .apply();
-    }
-
-    public String getCurrentUser() {
-        return preferences.getString(KEY_CURRENT_USER, null);
-    }
-
-    public void saveUserProfile(String username, UserProfile profile) {
-        userProfiles.put(username, profile);
-        saveUserProfiles();
-    }
-
-    public UserProfile getUserProfile(String username) {
-        return userProfiles.get(username);
-    }
-
-    private static class UserCredentials {
-        String password;
-        String email;
-
-        UserCredentials(String password, String email) {
-            this.password = password;
-            this.email = email;
+    public void registerUser(String email, String password, String username, RegisterCallback callback) {
+        User newUser = new User(username, email, username);
+        // In a real app, you would hash the password and store it securely
+        saveUser(newUser);
+        boolean success = true;
+        if (callback != null) {
+            callback.onComplete(success);
         }
+    }
+
+    public boolean updateUser(User user) {
+        saveUser(user);
+        return true;
+    }
+
+    public static class UserCredentials {
+        private String email;
+        private String password;
+
+        public UserCredentials(String email, String password) {
+            this.email = email;
+            this.password = password;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+    }
+
+    public interface RegisterCallback {
+        void onComplete(boolean success);
     }
 } 

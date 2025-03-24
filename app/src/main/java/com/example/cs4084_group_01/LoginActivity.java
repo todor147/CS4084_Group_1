@@ -2,18 +2,25 @@ package com.example.cs4084_group_01;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.example.cs4084_group_01.manager.UserManager;
 
 public class LoginActivity extends AppCompatActivity {
+    private TextInputLayout usernameLayout;
+    private TextInputLayout passwordLayout;
     private TextInputEditText usernameInput;
     private TextInputEditText passwordInput;
-    private Button loginButton;
-    private Button registerButton;
+    private MaterialButton loginButton;
+    private MaterialButton registerButton;
+    private CircularProgressIndicator loginProgress;
     private UserManager userManager;
 
     @Override
@@ -21,25 +28,70 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize UserManager
         userManager = UserManager.getInstance(this);
 
-        // Check if user is already logged in
         if (userManager.getCurrentUser() != null) {
             startDashboardActivity();
             return;
         }
 
-        // Initialize views
         initializeViews();
+        setupInputValidation();
         setupClickListeners();
     }
 
     private void initializeViews() {
+        usernameLayout = findViewById(R.id.usernameLayout);
+        passwordLayout = findViewById(R.id.passwordLayout);
         usernameInput = findViewById(R.id.usernameInput);
         passwordInput = findViewById(R.id.passwordInput);
         loginButton = findViewById(R.id.loginButton);
         registerButton = findViewById(R.id.registerButton);
+        loginProgress = findViewById(R.id.loginProgress);
+    }
+
+    private void setupInputValidation() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                validateInputs();
+            }
+        };
+
+        usernameInput.addTextChangedListener(textWatcher);
+        passwordInput.addTextChangedListener(textWatcher);
+    }
+
+    private void validateInputs() {
+        String username = usernameInput.getText().toString().trim();
+        String password = passwordInput.getText().toString();
+
+        boolean isValid = true;
+
+        if (username.isEmpty()) {
+            usernameLayout.setError("Username is required");
+            isValid = false;
+        } else {
+            usernameLayout.setError(null);
+        }
+
+        if (password.isEmpty()) {
+            passwordLayout.setError("Password is required");
+            isValid = false;
+        } else if (password.length() < 6) {
+            passwordLayout.setError("Password must be at least 6 characters");
+            isValid = false;
+        } else {
+            passwordLayout.setError(null);
+        }
+
+        loginButton.setEnabled(isValid);
     }
 
     private void setupClickListeners() {
@@ -48,19 +100,32 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void attemptLogin() {
-        String username = usernameInput.getText().toString();
+        String username = usernameInput.getText().toString().trim();
         String password = passwordInput.getText().toString();
 
-        if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        setLoading(true);
 
-        if (userManager.loginUser(username, password)) {
-            startDashboardActivity();
-        } else {
-            Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-        }
+        // Simulate network delay - remove this in production
+        loginButton.postDelayed(() -> {
+            if (userManager.loginUser(username, password)) {
+                startDashboardActivity();
+            } else {
+                setLoading(false);
+                showError("Invalid username or password");
+            }
+        }, 1000);
+    }
+
+    private void setLoading(boolean isLoading) {
+        loginProgress.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        loginButton.setEnabled(!isLoading);
+        registerButton.setEnabled(!isLoading);
+        usernameInput.setEnabled(!isLoading);
+        passwordInput.setEnabled(!isLoading);
+    }
+
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     private void startRegistration() {
@@ -72,5 +137,6 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DashboardActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+        finish();
     }
 } 

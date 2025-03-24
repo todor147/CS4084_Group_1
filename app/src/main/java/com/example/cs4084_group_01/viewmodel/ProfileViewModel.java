@@ -1,86 +1,78 @@
 package com.example.cs4084_group_01.viewmodel;
 
 import android.app.Application;
-
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-
-import com.example.cs4084_group_01.model.UserProfile;
 import com.example.cs4084_group_01.manager.UserManager;
-import com.example.cs4084_group_01.repository.ProfileRepository;
+import com.example.cs4084_group_01.model.User;
 
 public class ProfileViewModel extends AndroidViewModel {
-    private final ProfileRepository repository;
-    private final MutableLiveData<UserProfile> profileLiveData;
-    private final MutableLiveData<Boolean> isLoading;
-    private final MutableLiveData<String> error;
     private final UserManager userManager;
+    private final MutableLiveData<User> currentUser;
+    private final MutableLiveData<Boolean> isProfileComplete;
 
     public ProfileViewModel(Application application) {
         super(application);
-        repository = new ProfileRepository(application);
-        profileLiveData = new MutableLiveData<>();
-        isLoading = new MutableLiveData<>(false);
-        error = new MutableLiveData<>();
         userManager = UserManager.getInstance(application);
-        loadProfile();
+        currentUser = new MutableLiveData<>();
+        isProfileComplete = new MutableLiveData<>();
+        loadUserProfile();
     }
 
-    public void loadProfile() {
-        // Get profile from UserManager for user-specific profiles
-        String currentUser = userManager.getCurrentUser();
-        if (currentUser != null) {
-            UserProfile profile = userManager.getUserProfile(currentUser);
-            profileLiveData.setValue(profile);
+    private void loadUserProfile() {
+        User user = userManager.getCurrentUser();
+        currentUser.setValue(user);
+        isProfileComplete.setValue(user != null);
+    }
+
+    public LiveData<User> getCurrentUser() {
+        return currentUser;
+    }
+
+    public LiveData<Boolean> isProfileComplete() {
+        return isProfileComplete;
+    }
+
+    public LiveData<Boolean> updateProfile(String name, float height, float weight) {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+        User user = currentUser.getValue();
+        if (user != null) {
+            user.setName(name);
+            user.setHeight(height);
+            user.setWeight(weight);
+            boolean success = userManager.updateUser(user);
+            result.setValue(success);
+            if (success) {
+                currentUser.setValue(user);
+            }
+        } else {
+            result.setValue(false);
         }
+        return result;
     }
 
-    public void saveProfile(int age, float height, float weight, String gender, String activityLevel) {
-        UserProfile profile = new UserProfile();
-        profile.setAge(age);
-        profile.setHeight(height);
-        profile.setWeight(weight);
-        profile.setGender(gender);
-        profile.setActivityLevel(activityLevel);
-
-        // Save to both repository and UserManager
-        repository.saveProfile(profile);
-        String currentUser = userManager.getCurrentUser();
-        if (currentUser != null) {
-            userManager.saveUserProfile(currentUser, profile);
+    public LiveData<Boolean> updateUser(User user) {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+        if (user != null) {
+            boolean success = userManager.updateUser(user);
+            result.setValue(success);
+            if (success) {
+                currentUser.setValue(user);
+            }
+        } else {
+            result.setValue(false);
         }
-        profileLiveData.setValue(profile);
+        return result;
     }
 
-    public LiveData<UserProfile> getProfileLiveData() {
-        return profileLiveData;
-    }
-
-    public LiveData<Boolean> getIsLoading() {
-        return isLoading;
-    }
-
-    public LiveData<String> getError() {
-        return error;
-    }
-
-    public void deleteProfile() {
-        isLoading.setValue(true);
-        repository.deleteProfile();
-        String currentUser = userManager.getCurrentUser();
-        if (currentUser != null) {
-            userManager.saveUserProfile(currentUser, null);
-        }
-        profileLiveData.setValue(null);
-        isLoading.setValue(false);
+    public void clearProfile() {
+        userManager.logoutUser();
+        currentUser.setValue(null);
+        isProfileComplete.setValue(false);
     }
 
     public boolean hasProfile() {
-        String currentUser = userManager.getCurrentUser();
-        if (currentUser != null) {
-            return userManager.getUserProfile(currentUser) != null;
-        }
-        return false;
+        return currentUser.getValue() != null;
     }
-} 
+}

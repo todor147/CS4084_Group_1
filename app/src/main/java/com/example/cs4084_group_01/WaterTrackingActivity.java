@@ -1,137 +1,326 @@
 package com.example.cs4084_group_01;
 
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import com.example.cs4084_group_01.adapter.WaterIntakeHistoryAdapter;
-import com.example.cs4084_group_01.model.WaterIntake;
-import com.example.cs4084_group_01.repository.WaterIntakeRepository;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.google.android.material.slider.Slider;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import java.util.Collections;
-import java.util.Comparator;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.example.cs4084_group_01.model.WaterIntake;
+import com.example.cs4084_group_01.viewmodel.WaterViewModel;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class WaterTrackingActivity extends AppCompatActivity {
-    private WaterIntakeRepository repository;
-    private WaterIntake currentIntake;
-    private WaterIntakeHistoryAdapter historyAdapter;
-
-    // UI Components
-    private LinearProgressIndicator waterProgressBar;
+    private WaterViewModel waterViewModel;
+    private CircularProgressIndicator waterProgressIndicator;
     private TextView waterProgressText;
-    private TextView glassCountText;
+    private TextView waterAmountText;
     private TextView goalText;
-    private MaterialButton incrementButton;
-    private MaterialButton decrementButton;
-    private Slider goalSlider;
-    private RecyclerView historyRecyclerView;
+    private ListView historyListView;
+    private ArrayAdapter<String> historyAdapter;
+    private List<String> historyDisplayList;
+    private List<WaterIntake> historyDataList;
+    private SimpleDateFormat timeFormat;
+    private SimpleDateFormat dateFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_water_tracking);
 
-        // Setup toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // Initialize ViewModel
+        waterViewModel = new ViewModelProvider(this).get(WaterViewModel.class);
 
-        // Initialize repository
-        repository = new WaterIntakeRepository(this);
-        currentIntake = repository.getWaterIntake();
+        // Initialize time formatters
+        timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
         // Initialize UI components
-        initializeViews();
-        setupClickListeners();
-        setupGoalSlider();
-        setupHistoryRecyclerView();
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        // Update UI with current data
-        updateUI();
-        loadHistory();
-    }
-
-    private void initializeViews() {
-        waterProgressBar = findViewById(R.id.waterProgressBar);
+        waterProgressIndicator = findViewById(R.id.waterProgressIndicator);
         waterProgressText = findViewById(R.id.waterProgressText);
-        glassCountText = findViewById(R.id.glassCountText);
+        waterAmountText = findViewById(R.id.waterAmountText);
         goalText = findViewById(R.id.goalText);
-        incrementButton = findViewById(R.id.incrementButton);
-        decrementButton = findViewById(R.id.decrementButton);
-        goalSlider = findViewById(R.id.goalSlider);
-        historyRecyclerView = findViewById(R.id.historyRecyclerView);
-    }
-
-    private void setupClickListeners() {
-        incrementButton.setOnClickListener(v -> {
-            currentIntake.addGlass();
-            repository.saveWaterIntake(currentIntake);
-            updateUI();
-            loadHistory();
-        });
-
-        decrementButton.setOnClickListener(v -> {
-            currentIntake.removeGlass();
-            repository.saveWaterIntake(currentIntake);
-            updateUI();
-            loadHistory();
-        });
-    }
-
-    private void setupGoalSlider() {
-        goalSlider.setValue(currentIntake.getDailyGoal() / 1000); // Convert to liters
-        goalSlider.addOnChangeListener((slider, value, fromUser) -> {
-            if (fromUser) {
-                currentIntake.setDailyGoal(value * 1000); // Convert back to milliliters
-                repository.saveWaterIntake(currentIntake);
-                updateUI();
+        historyListView = findViewById(R.id.historyListView);
+        
+        // Set up list adapter for water history
+        historyDisplayList = new ArrayList<>();
+        historyDataList = new ArrayList<>();
+        historyAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, historyDisplayList);
+        historyListView.setAdapter(historyAdapter);
+        
+        // Set up listeners for history items
+        historyListView.setOnItemClickListener((parent, view, position, id) -> {
+            if (historyDataList.isEmpty() || position >= historyDataList.size()) {
+                return; // No data or invalid position
+            }
+            
+            WaterIntake intake = historyDataList.get(position);
+            if (isToday(intake.getDate())) {
+                showWaterIntakeOptionsDialog(intake, position);
+            } else {
+                Toast.makeText(this, "You can only edit today's entries", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Set up buttons for adding water
+        Button add100ml = findViewById(R.id.add100ml);
+        Button add250ml = findViewById(R.id.add250ml);
+        Button add500ml = findViewById(R.id.add500ml);
+        Button addCustom = findViewById(R.id.addCustom);
+        Button setGoalButton = findViewById(R.id.setGoalButton);
+        Button reduceWaterButton = findViewById(R.id.reduceWaterButton);
+
+        add100ml.setOnClickListener(v -> addWater(100));
+        add250ml.setOnClickListener(v -> addWater(250));
+        add500ml.setOnClickListener(v -> addWater(500));
+        addCustom.setOnClickListener(v -> showCustomAmountDialog());
+        setGoalButton.setOnClickListener(v -> showSetGoalDialog());
+        
+        // Add the reduceWaterButton listener if it's in the layout
+        if (reduceWaterButton != null) {
+            reduceWaterButton.setOnClickListener(v -> reduceWater());
+        }
+
+        // Observe water intake data
+        waterViewModel.getCurrentWaterIntake().observe(this, waterIntake -> {
+            updateUI(true);
+        });
     }
 
-    private void setupHistoryRecyclerView() {
-        historyAdapter = new WaterIntakeHistoryAdapter();
-        historyRecyclerView.setAdapter(historyAdapter);
-        historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+    private void updateUI(boolean animate) {
+        WaterIntake waterIntake = waterViewModel.getCurrentWaterIntake().getValue();
+        if (waterIntake == null) return;
+
+        float progress = waterIntake.getProgress();
+        
+        // Update progress indicator
+        if (animate) {
+            Animation animation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+            waterProgressIndicator.startAnimation(animation);
+        }
+        waterProgressIndicator.setProgress((int) progress);
+        
+        // Update text views
+        waterProgressText.setText(String.format(Locale.getDefault(), "%.0f%%", progress));
+        waterAmountText.setText(waterIntake.getFormattedIntake());
+        goalText.setText(String.format("Goal: %s", waterIntake.getFormattedGoal()));
+        
+        // Update history list
+        updateHistoryList();
+    }
+    
+    private void updateHistoryList() {
+        historyDisplayList.clear();
+        historyDataList.clear();
+        
+        List<WaterIntake> todayHistory = waterViewModel.getTodayHistory();
+        if (todayHistory.isEmpty()) {
+            historyDisplayList.add("No water intake recorded today");
+        } else {
+            for (WaterIntake intake : todayHistory) {
+                String timeStr = timeFormat.format(intake.getDate());
+                String entryText = timeStr + " - " + intake.getFormattedIntake();
+                historyDisplayList.add(entryText);
+                historyDataList.add(intake);
+            }
+        }
+        
+        historyAdapter.notifyDataSetChanged();
     }
 
-    private void updateUI() {
-        // Update progress bar
-        int progress = Math.round(currentIntake.getProgress());
-        waterProgressBar.setProgress(progress);
-
-        // Update progress text
-        waterProgressText.setText(String.format("%s / %s",
-                currentIntake.getFormattedIntake(),
-                currentIntake.getFormattedGoal()));
-
-        // Update glass count
-        int glassCount = currentIntake.getGlassCount();
-        glassCountText.setText(String.format("%d glass%s",
-                glassCount, glassCount == 1 ? "" : "es"));
-
-        // Update goal text
-        goalText.setText(String.format("Goal: %s", currentIntake.getFormattedGoal()));
-
-        // Enable/disable decrement button
-        decrementButton.setEnabled(currentIntake.getCurrentIntake() >= WaterIntake.getGlassSize());
+    private void addWater(float amount) {
+        if (amount <= 0) {
+            Toast.makeText(this, "Amount must be greater than 0", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        waterViewModel.updateWaterIntake(amount);
+        
+        // Show toast confirmation
+        Toast.makeText(this, 
+            String.format(Locale.getDefault(), "Added %.0f ml of water", amount), 
+            Toast.LENGTH_SHORT).show();
+    }
+    
+    private void reduceWater() {
+        WaterIntake current = waterViewModel.getCurrentWaterIntake().getValue();
+        if (current == null) return;
+        
+        showReduceWaterDialog(current.getCurrentIntake());
+    }
+    
+    private void showReduceWaterDialog(float currentAmount) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_custom_amount, null);
+        final EditText amountInput = view.findViewById(R.id.amountInput);
+        TextView dialogTitle = new TextView(this);
+        dialogTitle.setText("Reduce Water Amount (ml)");
+        dialogTitle.setPadding(30, 30, 30, 30);
+        
+        builder.setCustomTitle(dialogTitle)
+               .setView(view)
+               .setPositiveButton("Reduce", (dialog, which) -> {
+                   try {
+                       float amount = Float.parseFloat(amountInput.getText().toString());
+                       if (amount <= 0) {
+                           Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show();
+                           return;
+                       }
+                       
+                       if (amount > currentAmount) {
+                           Toast.makeText(this, "Amount cannot exceed current intake", Toast.LENGTH_SHORT).show();
+                           return;
+                       }
+                       
+                       waterViewModel.updateWaterIntake(-amount);
+                       Toast.makeText(this, 
+                           String.format(Locale.getDefault(), "Removed %.0f ml of water", amount), 
+                           Toast.LENGTH_SHORT).show();
+                   } catch (NumberFormatException e) {
+                       Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show();
+                   }
+               })
+               .setNegativeButton("Cancel", null)
+               .show();
+    }
+    
+    private void showWaterIntakeOptionsDialog(WaterIntake intake, int position) {
+        String[] options = {"Edit amount", "Remove entry"};
+        
+        new AlertDialog.Builder(this)
+            .setTitle("Water Intake Options")
+            .setItems(options, (dialog, which) -> {
+                switch (which) {
+                    case 0: // Edit amount
+                        showEditAmountDialog(intake);
+                        break;
+                    case 1: // Remove entry
+                        waterViewModel.removeWaterIntakeEntry(intake);
+                        updateHistoryList();
+                        break;
+                }
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+    
+    private void showEditAmountDialog(WaterIntake intake) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_custom_amount, null);
+        final EditText amountInput = view.findViewById(R.id.amountInput);
+        amountInput.setText(String.format(Locale.getDefault(), "%.0f", intake.getCurrentIntake()));
+        
+        builder.setTitle("Edit Water Amount (ml)")
+               .setView(view)
+               .setPositiveButton("Save", (dialog, which) -> {
+                   try {
+                       float amount = Float.parseFloat(amountInput.getText().toString());
+                       if (amount > 0) {
+                           intake.setCurrentIntake(amount);
+                           waterViewModel.updateWaterIntakeEntry(intake);
+                       } else {
+                           Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show();
+                       }
+                   } catch (NumberFormatException e) {
+                       Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show();
+                   }
+               })
+               .setNegativeButton("Cancel", null)
+               .show();
     }
 
-    private void loadHistory() {
-        List<WaterIntake> history = repository.getWaterIntakeHistory();
-        // Sort by date descending
-        Collections.sort(history, (a, b) -> b.getDate().compareTo(a.getDate()));
-        historyAdapter.setHistory(history);
+    private void showCustomAmountDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_custom_amount, null);
+        final EditText amountInput = view.findViewById(R.id.amountInput);
+        
+        builder.setTitle("Add Custom Amount (ml)")
+               .setView(view)
+               .setPositiveButton("Add", (dialog, which) -> {
+                   try {
+                       float amount = Float.parseFloat(amountInput.getText().toString());
+                       if (amount > 0) {
+                           addWater(amount);
+                       } else {
+                           Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show();
+                       }
+                   } catch (NumberFormatException e) {
+                       Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show();
+                   }
+               })
+               .setNegativeButton("Cancel", null)
+               .show();
+    }
+
+    private void showSetGoalDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_set_goal, null);
+        final EditText goalInput = view.findViewById(R.id.goalInput);
+        
+        // Pre-fill with current goal
+        WaterIntake currentIntake = waterViewModel.getCurrentWaterIntake().getValue();
+        if (currentIntake != null) {
+            goalInput.setText(String.format(Locale.getDefault(), "%.0f", currentIntake.getDailyGoal()));
+        }
+        
+        builder.setTitle("Set Daily Goal (ml)")
+               .setView(view)
+               .setPositiveButton("Save", (dialog, which) -> {
+                   try {
+                       float goal = Float.parseFloat(goalInput.getText().toString());
+                       if (goal > 0) {
+                           waterViewModel.setDailyGoal(goal);
+                       } else {
+                           Toast.makeText(this, "Please enter a valid goal", Toast.LENGTH_SHORT).show();
+                       }
+                   } catch (NumberFormatException e) {
+                       Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show();
+                   }
+               })
+               .setNegativeButton("Cancel", null)
+               .show();
+    }
+    
+    private boolean isToday(Date date) {
+        Calendar today = Calendar.getInstance();
+        Calendar entryDate = Calendar.getInstance();
+        entryDate.setTime(date);
+        
+        return today.get(Calendar.YEAR) == entryDate.get(Calendar.YEAR) &&
+               today.get(Calendar.DAY_OF_YEAR) == entryDate.get(Calendar.DAY_OF_YEAR);
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 } 
