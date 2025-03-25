@@ -7,8 +7,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -46,6 +44,10 @@
             android:label="Water Tracking" />
 
         <activity
+            android:name=".MoodSelection"
+            android:exported="false" />
+
+        <activity
             android:name=".BmiCalculatorActivity"
             android:exported="false"
             android:label="BMI Calculator" />
@@ -53,10 +55,6 @@
             android:name=".MoodTrackerActivity"
             android:exported="false"
             android:label="Mood Tracker" />
-        <activity
-            android:name=".MoodViewActivity"
-            android:exported="false"
-            android:label="View Mood" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
@@ -69,11 +67,6 @@
         <service
             android:name=".StepCounterService"
             android:foregroundServiceType="health"
-            android:exported="false" />
-
-        <receiver
-            android:name=".MoodNotificationManager$MoodReminderReceiver"
-            android:enabled="true"
             android:exported="false" />
 
     </application>

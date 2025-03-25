@@ -1,12 +1,14 @@
 package com.example.cs4084_group_01;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+import android.widget.ArrayAdapter;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,25 +16,30 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cs4084_group_01.model.MoodEntry;
 import com.example.cs4084_group_01.model.MoodType;
+import com.example.cs4084_group_01.repository.MoodRepository;
 import com.example.cs4084_group_01.viewmodel.MoodViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MoodTrackerActivity extends AppCompatActivity {
 
-    public static final String EXTRA_DATE = "selected_date";
     private MoodViewModel moodViewModel;
     private RadioGroup moodGroup;
     private TextInputEditText notesField;
     private Button saveButton;
     private CalendarView calendarView;
+    private ListView moodListView;
+    private ArrayAdapter<String> moodAdapter;
+    private List<String> moodDisplayList;
     private SimpleDateFormat dateFormat;
-    private Date selectedDate;
+    private SimpleDateFormat timeFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,41 +49,10 @@ public class MoodTrackerActivity extends AppCompatActivity {
         // Initialize ViewModel
         moodViewModel = new ViewModelProvider(this).get(MoodViewModel.class);
 
-        // Initialize date formatter
+        // Initialize date formatters
         dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
-        // Get date from intent or use current date
-        long dateMillis = getIntent().getLongExtra(EXTRA_DATE, System.currentTimeMillis());
-        selectedDate = new Date(dateMillis);
-        boolean forceEdit = getIntent().getBooleanExtra("force_edit", false);
-
-        // Check if there's already an entry for today
-        moodViewModel.setCurrentDate(selectedDate);
-        moodViewModel.getCurrentDateEntries().observe(this, entries -> {
-            if (entries != null && !entries.isEmpty() && !forceEdit) {
-                // If this is today's date and we already have an entry, switch to view mode
-                Calendar selectedCal = Calendar.getInstance();
-                selectedCal.setTime(selectedDate);
-                Calendar today = Calendar.getInstance();
-                
-                if (selectedCal.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-                    selectedCal.get(Calendar.MONTH) == today.get(Calendar.MONTH) &&
-                    selectedCal.get(Calendar.DAY_OF_MONTH) == today.get(Calendar.DAY_OF_MONTH)) {
-                    // Switch to view mode for today
-                    Intent intent = new Intent(this, MoodViewActivity.class);
-                    intent.putExtra(MoodViewActivity.EXTRA_DATE, selectedDate.getTime());
-                    startActivity(intent);
-                    finish();
-                    return;
-                }
-            }
-            
-            // Continue with normal initialization if we haven't redirected
-            initializeUI();
-        });
-    }
-
-    private void initializeUI() {
         // Initialize UI components
         MaterialToolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
@@ -87,65 +63,27 @@ public class MoodTrackerActivity extends AppCompatActivity {
         notesField = findViewById(R.id.notesField);
         saveButton = findViewById(R.id.saveButton);
         calendarView = findViewById(R.id.calendarView);
+        moodListView = findViewById(R.id.moodListView);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(selectedDate);
-        calendarView.setDate(selectedDate.getTime());
+        // Set up list adapter for mood entries
+        moodDisplayList = new ArrayList<>();
+        moodAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, moodDisplayList);
+        moodListView.setAdapter(moodAdapter);
 
         // Set up calendar to select dates
         calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             Calendar selectedCalendar = Calendar.getInstance();
             selectedCalendar.set(year, month, dayOfMonth);
-            Date newDate = selectedCalendar.getTime();
-            
-            // If selected date is not today, go to view mode
-            Calendar today = Calendar.getInstance();
-            if (selectedCalendar.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-                selectedCalendar.get(Calendar.MONTH) == today.get(Calendar.MONTH) &&
-                selectedCalendar.get(Calendar.DAY_OF_MONTH) == today.get(Calendar.DAY_OF_MONTH)) {
-                selectedDate = newDate;
-                moodViewModel.setCurrentDate(selectedDate);
-            } else {
-                Intent intent = new Intent(this, MoodViewActivity.class);
-                intent.putExtra(MoodViewActivity.EXTRA_DATE, newDate.getTime());
-                startActivity(intent);
-            }
+            moodViewModel.setCurrentDate(selectedCalendar.getTime());
         });
 
         // Set up save button
         saveButton.setOnClickListener(v -> saveMoodEntry());
 
-        // Load existing entry if available
+        // Observe mood entries for current date
         moodViewModel.getCurrentDateEntries().observe(this, entries -> {
-            if (entries != null && !entries.isEmpty()) {
-                MoodEntry lastEntry = entries.get(entries.size() - 1);
-                updateUIWithEntry(lastEntry);
-            }
+            updateMoodListView(entries);
         });
-    }
-
-    private void updateUIWithEntry(MoodEntry entry) {
-        // Set the mood radio button
-        switch (entry.getMoodType()) {
-            case HAPPY:
-                moodGroup.check(R.id.moodHappy);
-                break;
-            case CALM:
-                moodGroup.check(R.id.moodCalm);
-                break;
-            case NEUTRAL:
-                moodGroup.check(R.id.moodNeutral);
-                break;
-            case SAD:
-                moodGroup.check(R.id.moodSad);
-                break;
-            case STRESSED:
-                moodGroup.check(R.id.moodStressed);
-                break;
-        }
-
-        // Set the notes
-        notesField.setText(entry.getNotes());
     }
 
     private void saveMoodEntry() {
@@ -173,16 +111,33 @@ public class MoodTrackerActivity extends AppCompatActivity {
         String notes = notesField.getText() != null ? notesField.getText().toString() : "";
 
         // Create and save mood entry
-        MoodEntry entry = new MoodEntry(moodType, selectedDate, notes);
-        moodViewModel.saveMoodEntry(entry);
+        MoodEntry entry = new MoodEntry(moodType, new Date(), notes);
+        moodViewModel.saveMoodEntry(moodType, notes);
+
+        // Clear inputs
+        moodGroup.clearCheck();
+        notesField.setText("");
 
         Toast.makeText(this, "Mood saved successfully", Toast.LENGTH_SHORT).show();
+    }
 
-        // Switch to view mode
-        Intent intent = new Intent(this, MoodViewActivity.class);
-        intent.putExtra(MoodViewActivity.EXTRA_DATE, selectedDate.getTime());
-        startActivity(intent);
-        finish();
+    private void updateMoodListView(List<MoodEntry> entries) {
+        moodDisplayList.clear();
+
+        if (entries == null || entries.isEmpty()) {
+            moodDisplayList.add("No mood entries for this date");
+        } else {
+            for (MoodEntry entry : entries) {
+                String timeStr = timeFormat.format(entry.getTimestamp());
+                String entryText = timeStr + " - " + entry.getMoodType().toString();
+                if (!entry.getNotes().isEmpty()) {
+                    entryText += "\nNotes: " + entry.getNotes();
+                }
+                moodDisplayList.add(entryText);
+            }
+        }
+
+        moodAdapter.notifyDataSetChanged();
     }
 
     @Override

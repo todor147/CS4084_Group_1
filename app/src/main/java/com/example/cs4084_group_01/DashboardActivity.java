@@ -4,141 +4,139 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import com.example.cs4084_group_01.manager.UserManager;
-import com.example.cs4084_group_01.model.UserProfile;
-import com.example.cs4084_group_01.model.User;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-import com.google.android.material.button.MaterialButton;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.card.MaterialCardView;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.cs4084_group_01.manager.UserManager;
+import com.example.cs4084_group_01.model.User;
+import com.example.cs4084_group_01.model.Feature;
+import com.example.cs4084_group_01.adapter.FeaturesAdapter;
 
 public class DashboardActivity extends AppCompatActivity {
+    private TextView greetingText;
+    private TextView userNameText;
+    private RecyclerView featuresGrid;
     private UserManager userManager;
-    private TextView ageText, heightText, weightText, genderText, activityLevelText;
-    private TextView bmiValueText, bmiCategoryText, bmiDescriptionText;
-    private FloatingActionButton editProfileButton;
-    private static final int NOTIFICATION_PERMISSION_CODE = 123;
+    private MaterialCardView quickActionWater;
+    private MaterialCardView quickActionSteps;
+    private MaterialCardView bmiDashboardCard;
+    private TextView bmiValueDashboard;
+    private TextView bmiCategoryDashboard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
+        // Initialize views
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        greetingText = findViewById(R.id.greetingText);
+        userNameText = findViewById(R.id.userNameText);
+        featuresGrid = findViewById(R.id.featuresGrid);
+        quickActionWater = findViewById(R.id.quickActionWater);
+        quickActionSteps = findViewById(R.id.quickActionSteps);
+        bmiDashboardCard = findViewById(R.id.bmiDashboardCard);
+        bmiValueDashboard = findViewById(R.id.bmiValueDashboard);
+        bmiCategoryDashboard = findViewById(R.id.bmiCategoryDashboard);
+
+        // Set up toolbar
+        setSupportActionBar(toolbar);
+
         // Initialize UserManager
         userManager = UserManager.getInstance(this);
 
-        // Check if user is logged in
-        if (userManager.getCurrentUser() == null) {
-            startLoginActivity();
-            return;
-        }
+        // Update welcome message
+        updateWelcomeMessage();
+        
+        // Update BMI display
+        updateBMIDisplay();
 
-        // Setup Toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Dashboard");
+        // Set up features grid
+        setupFeaturesGrid();
 
-        // Initialize views
-        initializeViews();
-        loadUserProfile();
-
-        // Setup edit profile button
-        editProfileButton = findViewById(R.id.editProfileButton);
-        editProfileButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ProfileActivity.class);
-            startActivity(intent);
-        });
-
-        // Setup water tracking button
-        MaterialButton waterTrackingButton = findViewById(R.id.waterTrackingButton);
-        waterTrackingButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, WaterTrackingActivity.class);
-            startActivity(intent);
-        });
-
-        // Setup mood selection button
-        MaterialButton moodSelectionButton = findViewById(R.id.moodSelectionButton);
-        moodSelectionButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MoodTrackerActivity.class);
-            intent.putExtra(MoodTrackerActivity.EXTRA_DATE, System.currentTimeMillis());
-            startActivity(intent);
-        });
-
-        // Initialize notification system
-        MoodNotificationManager.createNotificationChannel(this);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                        NOTIFICATION_PERMISSION_CODE);
-            } else {
-                MoodNotificationManager.scheduleDaily(this);
-            }
-        } else {
-            MoodNotificationManager.scheduleDaily(this);
-        }
+        // Set up quick actions
+        setupQuickActions();
     }
 
-    private void initializeViews() {
-        // Profile Information
-        ageText = findViewById(R.id.ageText);
-        heightText = findViewById(R.id.heightText);
-        weightText = findViewById(R.id.weightText);
-        genderText = findViewById(R.id.genderText);
-        activityLevelText = findViewById(R.id.activityLevelText);
-
-        // BMI Information
-        bmiValueText = findViewById(R.id.bmiValueText);
-        bmiCategoryText = findViewById(R.id.bmiCategoryText);
-        bmiDescriptionText = findViewById(R.id.bmiDescriptionText);
-    }
-
-    private void loadUserProfile() {
+    private void updateWelcomeMessage() {
         User currentUser = userManager.getCurrentUser();
         if (currentUser != null) {
-            updateProfileDisplay(currentUser);
+            String name = currentUser.getName();
+            String email = currentUser.getEmail();
+            
+            // Set a personalized greeting based on time of day
+            int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
+            String greeting;
+            if (hour < 12) {
+                greeting = "Good morning";
+            } else if (hour < 17) {
+                greeting = "Good afternoon";
+            } else {
+                greeting = "Good evening";
+            }
+            greetingText.setText(greeting);
+            
+            // Use name if available, otherwise use email
+            String displayName = name != null && !name.isEmpty() ? name : email.split("@")[0];
+            userNameText.setText(displayName);
         } else {
-            // Profile not set up, redirect to ProfileActivity
-            Toast.makeText(this, "Please complete your profile", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, ProfileActivity.class);
-            startActivity(intent);
+            greetingText.setText("Welcome");
+            userNameText.setText("Guest");
         }
     }
 
-    private void updateProfileDisplay(User user) {
-        // Update profile information
-        ageText.setText(user.getName()); // Since User class doesn't have age, we'll show name instead
-        heightText.setText(String.format("%.1f cm", user.getHeight()));
-        weightText.setText(String.format("%.1f kg", user.getWeight()));
-        genderText.setText(user.getGender() != null ? user.getGender() : "Not set");
-        activityLevelText.setText(user.getActivityLevel() != null ? user.getActivityLevel() : "Not set");
+    private void setupFeaturesGrid() {
+        List<Feature> features = new ArrayList<>();
+        features.add(new Feature("Water Tracking", R.drawable.ic_water, WaterTrackingActivity.class));
+        features.add(new Feature("Step Counter", R.drawable.ic_directions_walk, StepCounterActivity.class));
+        features.add(new Feature("Mood Tracker", R.drawable.ic_mood, MoodTrackerActivity.class));
+        features.add(new Feature("Profile", R.drawable.ic_person, ProfileActivity.class));
 
-        // Calculate and display BMI
-        float height = user.getHeight() / 100; // Convert cm to meters
-        float weight = user.getWeight();
-        double bmi = weight / (height * height);
-        String category = getBMICategory(bmi);
-        String description = getBMIDescription(category);
-
-        bmiValueText.setText(String.format("%.1f", bmi));
-        bmiCategoryText.setText(category);
-        bmiDescriptionText.setText(description);
+        FeaturesAdapter adapter = new FeaturesAdapter(features, this);
+        featuresGrid.setLayoutManager(new GridLayoutManager(this, 2));
+        featuresGrid.setAdapter(adapter);
     }
 
-    private String getBMICategory(double bmi) {
+    private void setupQuickActions() {
+        quickActionWater.setOnClickListener(v -> {
+            Intent intent = new Intent(this, WaterTrackingActivity.class);
+            intent.putExtra("quick_add", true);
+            startActivity(intent);
+        });
+
+        quickActionSteps.setOnClickListener(v -> {
+            Intent intent = new Intent(this, StepCounterActivity.class);
+            intent.putExtra("quick_view", true);
+            startActivity(intent);
+        });
+    }
+
+    private void updateBMIDisplay() {
+        User currentUser = userManager.getCurrentUser();
+        if (currentUser != null && currentUser.getHeight() > 0 && currentUser.getWeight() > 0) {
+            float heightInMeters = currentUser.getHeight() / 100f;
+            float bmi = currentUser.getWeight() / (heightInMeters * heightInMeters);
+            
+            bmiValueDashboard.setText(String.format("%.1f", bmi));
+            bmiCategoryDashboard.setText(getBMICategory(bmi));
+            bmiDashboardCard.setVisibility(View.VISIBLE);
+        } else {
+            bmiDashboardCard.setVisibility(View.GONE);
+        }
+    }
+    
+    private String getBMICategory(float bmi) {
         if (bmi < 18.5) {
             return "Underweight";
         } else if (bmi < 25) {
-            return "Normal";
+            return "Normal weight";
         } else if (bmi < 30) {
             return "Overweight";
         } else {
@@ -146,25 +144,11 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
-    private String getBMIDescription(String category) {
-        switch (category) {
-            case "Underweight":
-                return "You may need to gain some weight to reach a healthy BMI range.";
-            case "Normal":
-                return "Your BMI is within a healthy range. Keep up the good work!";
-            case "Overweight":
-                return "Consider making lifestyle changes to reach a healthier BMI range.";
-            case "Obese":
-                return "Consult with a healthcare provider about strategies to improve your health.";
-            default:
-                return "BMI information not available.";
-        }
-    }
-
-    private void startLoginActivity() {
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Update BMI display when returning to the dashboard
+        updateBMIDisplay();
     }
 
     @Override
@@ -177,25 +161,10 @@ public class DashboardActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
             userManager.logoutUser();
-            startLoginActivity();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadUserProfile(); // Reload profile data when returning to dashboard
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                MoodNotificationManager.scheduleDaily(this);
-            }
-        }
-    }
-}
+} 
