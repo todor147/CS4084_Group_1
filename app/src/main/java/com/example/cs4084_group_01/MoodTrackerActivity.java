@@ -124,7 +124,7 @@ public class MoodTrackerActivity extends AppCompatActivity {
     private void updateMoodListView(List<MoodEntry> entries) {
         moodDisplayList.clear();
 
-        if (entries.isEmpty()) {
+        if (entries == null || entries.isEmpty()) {
             moodDisplayList.add("No mood entries for this date");
         } else {
             for (MoodEntry entry : entries) {
