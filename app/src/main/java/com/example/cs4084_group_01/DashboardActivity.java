@@ -116,6 +116,13 @@ public class DashboardActivity extends AppCompatActivity {
             intent.putExtra("quick_view", true);
             startActivity(intent);
         });
+
+        // Setup mood selection button
+        MaterialButton moodSelectionButton = findViewById(R.id.moodSelectionButton);
+        moodSelectionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MoodSelectionActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void updateBMIDisplay() {
