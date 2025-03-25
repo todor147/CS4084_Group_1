@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class MoodViewModel extends AndroidViewModel {
     private final MoodRepository moodRepository;
@@ -50,7 +51,7 @@ public class MoodViewModel extends AndroidViewModel {
             if (allEntries != null && allEntries.containsKey(currentDate)) {
                 currentDateEntriesLiveData.setValue(allEntries.get(currentDate));
             } else {
-                currentDateEntriesLiveData.setValue(null);
+                currentDateEntriesLiveData.setValue(new ArrayList<>());
             }
         }
     }
