@@ -64,6 +64,11 @@
             android:name=".StepCounterActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".HealthDashboardActivity"
+            android:exported="false"
+            android:label="Health Dashboard" />
+
         <service
             android:name=".StepCounterService"
             android:foregroundServiceType="health"

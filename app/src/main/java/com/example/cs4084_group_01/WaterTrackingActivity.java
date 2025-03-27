@@ -142,9 +142,31 @@ public class WaterTrackingActivity extends AppCompatActivity {
         if (todayHistory.isEmpty()) {
             historyDisplayList.add("No water intake recorded today");
         } else {
-            for (WaterIntake intake : todayHistory) {
+            // Sort by time in descending order (newest first)
+            todayHistory.sort((a, b) -> b.getDate().compareTo(a.getDate()));
+            
+            float previousAmount = 0;
+            for (int i = 0; i < todayHistory.size(); i++) {
+                WaterIntake intake = todayHistory.get(i);
                 String timeStr = timeFormat.format(intake.getDate());
-                String entryText = timeStr + " - " + intake.getFormattedIntake();
+                String dateStr = dateFormat.format(intake.getDate());
+                
+                // Determine if this was an addition or reduction
+                String transactionType = "";
+                if (i < todayHistory.size() - 1) {
+                    // Compare with the next item (which is earlier in time since we sorted descending)
+                    float difference = intake.getCurrentIntake() - todayHistory.get(i + 1).getCurrentIntake();
+                    if (difference > 0) {
+                        transactionType = "Added " + String.format(Locale.getDefault(), "%.0f ml", difference);
+                    } else if (difference < 0) {
+                        transactionType = "Reduced " + String.format(Locale.getDefault(), "%.0f ml", -difference);
+                    }
+                } else if (i == todayHistory.size() - 1) {
+                    // This is the first entry of the day
+                    transactionType = "Initial " + String.format(Locale.getDefault(), "%.0f ml", intake.getCurrentIntake());
+                }
+                
+                String entryText = timeStr + " - " + intake.getFormattedIntake() + " (" + transactionType + ")";
                 historyDisplayList.add(entryText);
                 historyDataList.add(intake);
             }
