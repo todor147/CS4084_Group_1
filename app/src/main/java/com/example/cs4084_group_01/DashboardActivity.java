@@ -97,6 +97,7 @@ public class DashboardActivity extends AppCompatActivity {
         features.add(new Feature("Water Tracking", R.drawable.ic_water, WaterTrackingActivity.class));
         features.add(new Feature("Step Counter", R.drawable.ic_directions_walk, StepCounterActivity.class));
         features.add(new Feature("Mood Tracker", R.drawable.ic_mood, MoodTrackerActivity.class));
+        features.add(new Feature("Health Summary", R.drawable.ic_health, HealthDashboardActivity.class));
         features.add(new Feature("Profile", R.drawable.ic_person, ProfileActivity.class));
 
         FeaturesAdapter adapter = new FeaturesAdapter(features, this);
