@@ -8,6 +8,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.cs4084_group_01.model.MealEntry;
+import com.example.cs4084_group_01.model.MealType;
 import com.example.cs4084_group_01.model.MoodEntry;
 import com.example.cs4084_group_01.model.MoodType;
 import com.example.cs4084_group_01.model.StepData;
@@ -25,6 +27,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 
 public class HealthDashboardActivity extends AppCompatActivity {
     private HealthDashboardViewModel viewModel;
@@ -39,6 +43,9 @@ public class HealthDashboardActivity extends AppCompatActivity {
     private LinearProgressIndicator waterProgressIndicator;
     private TextView moodTypeText;
     private TextView moodTimeText;
+    private TextView mealsCountText;
+    private TextView caloriesText;
+    private TextView mealsSummaryText;
     private MaterialButton resetButton;
     
     private SimpleDateFormat dateFormat;
@@ -90,6 +97,9 @@ public class HealthDashboardActivity extends AppCompatActivity {
         waterProgressIndicator = findViewById(R.id.waterProgressIndicator);
         moodTypeText = findViewById(R.id.moodTypeText);
         moodTimeText = findViewById(R.id.moodTimeText);
+        mealsCountText = findViewById(R.id.mealsCountText);
+        caloriesText = findViewById(R.id.caloriesText);
+        mealsSummaryText = findViewById(R.id.mealsSummaryText);
         resetButton = findViewById(R.id.resetButton);
     }
     
@@ -109,6 +119,14 @@ public class HealthDashboardActivity extends AppCompatActivity {
         
         // Observe mood data
         viewModel.getMoodEntry().observe(this, this::updateMoodData);
+        
+        // Observe meal data
+        viewModel.getTodayMeals().observe(this, this::updateMealData);
+        
+        // Observe total calories
+        viewModel.getTotalCalories().observe(this, calories -> {
+            caloriesText.setText(String.format(Locale.getDefault(), "%d calories", calories));
+        });
     }
     
     private void updateDateDisplay() {
@@ -158,6 +176,36 @@ public class HealthDashboardActivity extends AppCompatActivity {
         } else {
             moodTypeText.setText("No mood recorded");
             moodTimeText.setText("Last updated: -");
+        }
+    }
+    
+    private void updateMealData(List<MealEntry> meals) {
+        if (meals != null && !meals.isEmpty()) {
+            int mealCount = meals.size();
+            mealsCountText.setText(String.format(Locale.getDefault(), "%d meal%s", 
+                    mealCount, mealCount == 1 ? "" : "s"));
+            
+            // Create a meal type summary
+            Map<MealType, Integer> mealTypeCounts = new HashMap<>();
+            for (MealEntry meal : meals) {
+                MealType type = meal.getMealType();
+                mealTypeCounts.put(type, mealTypeCounts.getOrDefault(type, 0) + 1);
+            }
+            
+            StringBuilder summary = new StringBuilder();
+            for (Map.Entry<MealType, Integer> entry : mealTypeCounts.entrySet()) {
+                if (summary.length() > 0) {
+                    summary.append(", ");
+                }
+                summary.append(entry.getKey().getDisplayName())
+                       .append(": ")
+                       .append(entry.getValue());
+            }
+            
+            mealsSummaryText.setText(summary.toString());
+        } else {
+            mealsCountText.setText("0 meals");
+            mealsSummaryText.setText("No meals recorded today");
         }
     }
     
