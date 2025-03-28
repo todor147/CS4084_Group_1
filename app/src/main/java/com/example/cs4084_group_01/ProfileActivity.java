@@ -66,6 +66,35 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         saveButton.setOnClickListener(v -> handleSave());
+        
+        // Add listeners to gender and activity level chip groups
+        genderGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            // Update BMI when gender selection changes
+            if (heightInput.getText() != null && !heightInput.getText().toString().isEmpty() &&
+                weightInput.getText() != null && !weightInput.getText().toString().isEmpty()) {
+                try {
+                    float height = Float.parseFloat(heightInput.getText().toString());
+                    float weight = Float.parseFloat(weightInput.getText().toString());
+                    updateBMI(height, weight);
+                } catch (NumberFormatException e) {
+                    // Ignore if parsing fails
+                }
+            }
+        });
+        
+        activityGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            // Update BMI when activity level selection changes
+            if (heightInput.getText() != null && !heightInput.getText().toString().isEmpty() &&
+                weightInput.getText() != null && !weightInput.getText().toString().isEmpty()) {
+                try {
+                    float height = Float.parseFloat(heightInput.getText().toString());
+                    float weight = Float.parseFloat(weightInput.getText().toString());
+                    updateBMI(height, weight);
+                } catch (NumberFormatException e) {
+                    // Ignore if parsing fails
+                }
+            }
+        });
     }
 
     private void observeViewModel() {
@@ -78,7 +107,7 @@ public class ProfileActivity extends AppCompatActivity {
                 if (user.getWeight() > 0) {
                     weightInput.setText(String.valueOf(user.getWeight()));
                 }
-                updateBMI(user.getHeight(), user.getWeight());
+                
                 // Set gender and activity level chips
                 if (user.getGender() != null) {
                     int genderChipId = getGenderChipId(user.getGender());
@@ -86,12 +115,16 @@ public class ProfileActivity extends AppCompatActivity {
                         genderGroup.check(genderChipId);
                     }
                 }
+                
                 if (user.getActivityLevel() != null) {
                     int activityChipId = getActivityChipId(user.getActivityLevel());
                     if (activityChipId != View.NO_ID) {
                         activityGroup.check(activityChipId);
                     }
                 }
+                
+                // Update BMI with all available data
+                updateBMI(user.getHeight(), user.getWeight());
             }
         });
     }
@@ -163,17 +196,39 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateBMI(float height, float weight) {
         if (height > 0 && weight > 0) {
+            String gender = getSelectedGender();
+            String activityLevel = getSelectedActivityLevel();
+            
             float heightInMeters = height / 100f;
             float bmi = weight / (heightInMeters * heightInMeters);
+            
+            // Apply adjustments based on gender and activity level
+            if (gender != null && gender.equals("Female")) {
+                // Women typically have higher body fat percentage, so BMI calculation is slightly different
+                bmi = bmi * 0.95f;  // 5% adjustment for female physiology
+            }
+            
+            // Adjust BMI interpretation based on activity level
+            float adjustedBmi = bmi;
+            if (activityLevel != null) {
+                if (activityLevel.equals("Highly Active")) {
+                    // Athletes may have higher muscle mass, affecting BMI interpretation
+                    adjustedBmi = bmi * 0.9f;  // 10% adjustment for high activity/muscle mass
+                } else if (activityLevel.equals("Active")) {
+                    adjustedBmi = bmi * 0.95f;  // 5% adjustment for active individuals
+                }
+            }
+            
             bmiValueText.setText(String.format("%.1f", bmi));
-            bmiCategoryText.setText(getBMICategory(bmi));
+            bmiCategoryText.setText(getBMICategory(adjustedBmi, gender, activityLevel));
             bmiCard.setVisibility(android.view.View.VISIBLE);
         } else {
             bmiCard.setVisibility(android.view.View.GONE);
         }
     }
 
-    private String getBMICategory(float bmi) {
+    private String getBMICategory(float bmi, String gender, String activityLevel) {
+        // Base BMI categories
         if (bmi < 18.5) {
             return "Underweight";
         } else if (bmi < 25) {
