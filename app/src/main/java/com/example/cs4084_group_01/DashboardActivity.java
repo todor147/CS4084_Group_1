@@ -72,6 +72,13 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Setup workout tracking button
+        MaterialButton workoutTrackingButton = findViewById(R.id.workoutTrackingButton);
+        workoutTrackingButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, WorkoutTrackingActivity.class);
+            startActivity(intent);
+        });
+
         // Initialize notification system
         MoodNotificationManager.createNotificationChannel(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

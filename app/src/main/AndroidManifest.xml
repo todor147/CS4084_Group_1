@@ -76,6 +76,11 @@
             android:enabled="true"
             android:exported="false" />
 
+        <activity
+            android:name=".WorkoutTrackingActivity"
+            android:exported="false"
+            android:label="Workout Tracker" />
+
     </application>
 
 </manifest>
