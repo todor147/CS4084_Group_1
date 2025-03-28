@@ -98,6 +98,7 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:tag="Male"
                     android:text="Male" />
 
                 <com.google.android.material.chip.Chip
@@ -105,14 +106,9 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:tag="Female"
                     android:text="Female" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipOther"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Other" />
             </com.google.android.material.chip.ChipGroup>
 
             <!-- Activity level selection -->
@@ -135,6 +131,7 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:tag="Sedentary"
                     android:text="Sedentary" />
 
                 <com.google.android.material.chip.Chip
@@ -142,6 +139,7 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:tag="Lightly Active"
                     android:text="Lightly Active" />
 
                 <com.google.android.material.chip.Chip
@@ -149,6 +147,7 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:tag="Moderately Active"
                     android:text="Moderately Active" />
 
                 <com.google.android.material.chip.Chip
@@ -156,6 +155,7 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:tag="Very Active"
                     android:text="Very Active" />
             </com.google.android.material.chip.ChipGroup>
 
