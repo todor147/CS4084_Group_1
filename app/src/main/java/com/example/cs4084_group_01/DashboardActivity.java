@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class DashboardActivity extends AppCompatActivity {
     private MaterialCardView bmiDashboardCard;
     private TextView bmiValueDashboard;
     private TextView bmiCategoryDashboard;
+    private MaterialButton editProfileButton;
+    private MaterialButton workoutTrackingButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,7 @@ public class DashboardActivity extends AppCompatActivity {
         bmiDashboardCard = findViewById(R.id.bmiDashboardCard);
         bmiValueDashboard = findViewById(R.id.bmiValueDashboard);
         bmiCategoryDashboard = findViewById(R.id.bmiCategoryDashboard);
+        workoutTrackingButton = findViewById(R.id.workoutTrackingButton);
 
         // Set up toolbar
         setSupportActionBar(toolbar);
@@ -63,6 +67,14 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Set up quick actions
         setupQuickActions();
+        
+        // Setup workout tracking button
+        if (workoutTrackingButton != null) {
+            workoutTrackingButton.setOnClickListener(v -> {
+                Intent intent = new Intent(this, WorkoutTrackingActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void updateWelcomeMessage() {
@@ -100,6 +112,7 @@ public class DashboardActivity extends AppCompatActivity {
         features.add(new Feature("Meal Tracker", R.drawable.ic_food, MealLoggerActivity.class));
         features.add(new Feature("Health Summary", R.drawable.ic_health, HealthDashboardActivity.class));
         features.add(new Feature("Profile", R.drawable.ic_person, ProfileActivity.class));
+        features.add(new Feature("Workout Tracker", R.drawable.ic_fitness, WorkoutTrackingActivity.class));
 
         FeaturesAdapter adapter = new FeaturesAdapter(features, this);
         featuresGrid.setLayoutManager(new GridLayoutManager(this, 2));

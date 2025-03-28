@@ -64,6 +64,10 @@
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="Settings" />
+        <activity
+            android:name=".WorkoutTrackingActivity"
+            android:exported="false"
+            android:label="Workout Tracker" />
         <service
             android:name=".StepCounterService"
             android:enabled="true"
