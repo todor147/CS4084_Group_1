@@ -30,50 +30,45 @@
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".DashboardActivity"
             android:exported="false" />
         <activity
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".DashboardActivity"
-            android:exported="false" />
-        <activity
             android:name=".WaterTrackingActivity"
             android:exported="false"
             android:label="Water Tracking" />
-
         <activity
-            android:name=".MoodSelection"
+            android:name=".StepCounterActivity"
             android:exported="false" />
-
-        <activity
-            android:name=".BmiCalculatorActivity"
-            android:exported="false"
-            android:label="BMI Calculator" />
         <activity
             android:name=".MoodTrackerActivity"
             android:exported="false"
             android:label="Mood Tracker" />
         <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="Settings" />
-
-        <activity
-            android:name=".StepCounterActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".HealthDashboardActivity"
             android:exported="false"
             android:label="Health Dashboard" />
-
+        <activity
+            android:name=".MealLoggerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MoodSelection"
+            android:exported="false" />
+        <activity
+            android:name=".BmiCalculatorActivity"
+            android:exported="false"
+            android:label="BMI Calculator" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="Settings" />
         <service
             android:name=".StepCounterService"
-            android:foregroundServiceType="health"
-            android:exported="false" />
-
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="health" />
     </application>
 
 </manifest>
