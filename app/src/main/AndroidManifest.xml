@@ -81,6 +81,11 @@
             android:exported="false"
             android:label="Workout Tracker" />
 
+        <activity
+            android:name=".MeditationActivity"
+            android:exported="false"
+            android:label="Meditation Timer" />
+
     </application>
 
 </manifest>

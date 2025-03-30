@@ -79,6 +79,13 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Setup meditation button
+        MaterialButton meditationButton = findViewById(R.id.meditationButton);
+        meditationButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MeditationActivity.class);
+            startActivity(intent);
+        });
+
         // Initialize notification system
         MoodNotificationManager.createNotificationChannel(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
