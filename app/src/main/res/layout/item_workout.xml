@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    app:cardElevation="2dp">
+    app:cardElevation="2dp"
+    app:cardCornerRadius="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,19 +34,46 @@
             android:orientation="horizontal"
             android:layout_marginTop="8dp">
 
-            <TextView
-                android:id="@+id/durationText"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textAppearance="?attr/textAppearanceBody2" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_directions_walk"
+                    app:tint="?attr/colorPrimary"
+                    android:layout_marginEnd="4dp"/>
+                
+                <TextView
+                    android:id="@+id/durationText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/intensityText"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceBody2" />
-
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_fitness"
+                    app:tint="?attr/colorPrimary"
+                    android:layout_marginEnd="4dp"/>
+                
+                <TextView
+                    android:id="@+id/intensityText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>

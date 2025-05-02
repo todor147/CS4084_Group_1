@@ -1,0 +1,47 @@
+{
+  "name": "UL Sport Gym",
+  "description": "With over a hundred pieces of equipment, this is a very comprehensive gym well equipped to deal with the needs of all types of individuals ranging from elite sports people to members of the general public.",
+  "location": "University of Limerick, Castletroy, Limerick V94XT66",
+  "contactPhone": "+353(0)61 213555",
+  "contactEmail": "ulsport@ul.ie",
+  "facilities": [
+    "Treadmills",
+    "Steppers",
+    "Bikes (Upright & Recumbant) Incl. Watt Bikes",
+    "Rowing Ergometers",
+    "Arc trainers",
+    "Cross trainers",
+    "A versa climber",
+    "Free weights area with 700kg of weight plates",
+    "Dumbbells ranging from 1.25kg to 60kg",
+    "Over thirty five resistance training stations"
+  ],
+  "rules": [
+    "Gym users must be over 14 Years of Age",
+    "Parental consent and ID required for 14-17 year olds",
+    "Code of conduct must be respected at all times"
+  ],
+  "hours": {
+    "monday": {"open": "06:30", "close": "22:30"},
+    "tuesday": {"open": "06:30", "close": "22:30"},
+    "wednesday": {"open": "06:30", "close": "22:30"},
+    "thursday": {"open": "06:30", "close": "22:30"},
+    "friday": {"open": "06:30", "close": "22:00"},
+    "saturday": {"open": "09:00", "close": "18:00"},
+    "sunday": {"open": "09:00", "close": "18:00"}
+  },
+  "specialHours": [
+    {
+      "date": "2025-12-24", 
+      "open": "09:00", 
+      "close": "14:00", 
+      "note": "Christmas Eve"
+    },
+    {
+      "date": "2025-12-25", 
+      "open": "00:00", 
+      "close": "00:00", 
+      "note": "Closed - Christmas Day"
+    }
+  ]
+} 

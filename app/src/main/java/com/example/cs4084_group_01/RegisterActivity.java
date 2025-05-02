@@ -3,12 +3,11 @@ package com.example.cs4084_group_01;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.example.cs4084_group_01.manager.UserManager;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends BaseActivity {
     private TextInputEditText usernameInput;
     private TextInputEditText emailInput;
     private TextInputEditText passwordInput;

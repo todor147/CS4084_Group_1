@@ -47,6 +47,9 @@
         <item name="colorOnError">@color/white</item>
         <item name="colorErrorContainer">@color/error_color</item>
         <item name="colorOnErrorContainer">@color/white</item>
+        
+        <!-- Custom widget styles -->
+        <item name="floatingActionButtonStyle">@style/Widget.App.FloatingActionButton</item>
     </style>
 
     <style name="Theme.HealthTracker" parent="Theme.Material3.DayNight.NoActionBar">

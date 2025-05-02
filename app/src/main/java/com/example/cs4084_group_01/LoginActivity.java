@@ -6,20 +6,21 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.example.cs4084_group_01.manager.UserManager;
+import android.widget.TextView;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
     private TextInputLayout usernameLayout;
     private TextInputLayout passwordLayout;
     private TextInputEditText usernameInput;
     private TextInputEditText passwordInput;
     private MaterialButton loginButton;
     private MaterialButton registerButton;
+    private TextView skipLoginText;
     private CircularProgressIndicator loginProgress;
     private UserManager userManager;
 
@@ -47,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         passwordInput = findViewById(R.id.passwordInput);
         loginButton = findViewById(R.id.loginButton);
         registerButton = findViewById(R.id.registerButton);
+        skipLoginText = findViewById(R.id.skipLoginText);
         loginProgress = findViewById(R.id.loginProgress);
     }
 
@@ -97,6 +99,24 @@ public class LoginActivity extends AppCompatActivity {
     private void setupClickListeners() {
         loginButton.setOnClickListener(v -> attemptLogin());
         registerButton.setOnClickListener(v -> startRegistration());
+        
+        // Add click listener for skip login button
+        skipLoginText.setOnClickListener(v -> {
+            // Register a default test user if one doesn't exist
+            if (userManager.getUserCredentials() == null) {
+                userManager.registerUser("test@example.com", "password123", "Test User", 
+                    success -> {
+                        if (success) {
+                            startDashboardActivity();
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Failed to create test user", 
+                                Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            } else {
+                startDashboardActivity();
+            }
+        });
     }
 
     private void attemptLogin() {
@@ -120,6 +140,7 @@ public class LoginActivity extends AppCompatActivity {
         loginProgress.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         loginButton.setEnabled(!isLoading);
         registerButton.setEnabled(!isLoading);
+        skipLoginText.setEnabled(!isLoading);
         usernameInput.setEnabled(!isLoading);
         passwordInput.setEnabled(!isLoading);
     }

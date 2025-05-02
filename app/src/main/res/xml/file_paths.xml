@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- External files directory for app-specific documents -->
+    <external-files-path
+        name="export_files"
+        path="Documents/FitTracker/Exports" />
+    
+    <!-- External cache directory for temporary files -->
+    <external-cache-path
+        name="temp_files"
+        path="." />
+</paths> 
