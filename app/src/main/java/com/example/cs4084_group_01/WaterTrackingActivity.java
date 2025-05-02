@@ -1,6 +1,8 @@
 package com.example.cs4084_group_01;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
@@ -15,10 +17,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cs4084_group_01.model.WaterIntake;
+import com.example.cs4084_group_01.util.DemoDataProvider;
 import com.example.cs4084_group_01.viewmodel.WaterViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -30,7 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class WaterTrackingActivity extends AppCompatActivity {
+public class WaterTrackingActivity extends BaseActivity {
     private WaterViewModel waterViewModel;
     private CircularProgressIndicator waterProgressIndicator;
     private TextView waterProgressText;
@@ -42,14 +44,26 @@ public class WaterTrackingActivity extends AppCompatActivity {
     private List<WaterIntake> historyDataList;
     private SimpleDateFormat timeFormat;
     private SimpleDateFormat dateFormat;
+    private boolean isDemoMode = false;
+    
+    // Demo mode variables
+    private WaterIntake demoDayIntake;
+    private List<WaterIntake> demoHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_water_tracking);
 
-        // Initialize ViewModel
-        waterViewModel = new ViewModelProvider(this).get(WaterViewModel.class);
+        // Check if in demo mode
+        isDemoMode = DemoDataProvider.isDemoModeEnabled(this);
+
+        // Initialize ViewModel (only if not in demo mode)
+        if (!isDemoMode) {
+            waterViewModel = new ViewModelProvider(this).get(WaterViewModel.class);
+        } else {
+            setupDemoData();
+        }
 
         // Initialize time formatters
         timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
@@ -79,6 +93,11 @@ public class WaterTrackingActivity extends AppCompatActivity {
                 return; // No data or invalid position
             }
             
+            if (isDemoMode) {
+                Toast.makeText(this, "Demo mode: Cannot edit entries", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
             WaterIntake intake = historyDataList.get(position);
             if (isToday(intake.getDate())) {
                 showWaterIntakeOptionsDialog(intake, position);
@@ -95,25 +114,107 @@ public class WaterTrackingActivity extends AppCompatActivity {
         Button setGoalButton = findViewById(R.id.setGoalButton);
         Button reduceWaterButton = findViewById(R.id.reduceWaterButton);
 
-        add100ml.setOnClickListener(v -> addWater(100));
-        add250ml.setOnClickListener(v -> addWater(250));
-        add500ml.setOnClickListener(v -> addWater(500));
-        addCustom.setOnClickListener(v -> showCustomAmountDialog());
-        setGoalButton.setOnClickListener(v -> showSetGoalDialog());
-        
-        // Add the reduceWaterButton listener if it's in the layout
-        if (reduceWaterButton != null) {
-            reduceWaterButton.setOnClickListener(v -> reduceWater());
+        // Set up click listeners
+        if (isDemoMode) {
+            // In demo mode, just show toasts
+            add100ml.setOnClickListener(v -> showDemoToast("Added 100ml in demo mode"));
+            add250ml.setOnClickListener(v -> showDemoToast("Added 250ml in demo mode"));
+            add500ml.setOnClickListener(v -> showDemoToast("Added 500ml in demo mode"));
+            addCustom.setOnClickListener(v -> showDemoToast("Added custom amount in demo mode"));
+            setGoalButton.setOnClickListener(v -> showDemoToast("Set goal in demo mode"));
+            if (reduceWaterButton != null) {
+                reduceWaterButton.setOnClickListener(v -> showDemoToast("Reduced water in demo mode"));
+            }
+        } else {
+            // Normal mode functionality
+            add100ml.setOnClickListener(v -> addWater(100));
+            add250ml.setOnClickListener(v -> addWater(250));
+            add500ml.setOnClickListener(v -> addWater(500));
+            addCustom.setOnClickListener(v -> showCustomAmountDialog());
+            setGoalButton.setOnClickListener(v -> showSetGoalDialog());
+            if (reduceWaterButton != null) {
+                reduceWaterButton.setOnClickListener(v -> reduceWater());
+            }
+            
+            // Observe water intake data in normal mode
+            waterViewModel.getCurrentWaterIntake().observe(this, waterIntake -> {
+                updateUI(true);
+            });
         }
-
-        // Observe water intake data
-        waterViewModel.getCurrentWaterIntake().observe(this, waterIntake -> {
-            updateUI(true);
-        });
+        
+        // Update UI initially
+        updateUI(false);
+    }
+    
+    /**
+     * Set up sample data for demo mode
+     */
+    private void setupDemoData() {
+        // Toast to indicate demo mode
+        Toast.makeText(this, "Demo mode: Sample water data is shown", Toast.LENGTH_SHORT).show();
+        
+        // Create demo day intake
+        float todayIntake = DemoDataProvider.getTodayWaterIntake();
+        float waterGoal = DemoDataProvider.getWaterGoal();
+        
+        demoDayIntake = new WaterIntake(new Date(), todayIntake, waterGoal);
+        
+        // Create demo history
+        demoHistory = new ArrayList<>();
+        List<Float> waterData = DemoDataProvider.getSampleWaterData(7);
+        
+        // Create entries for each past day
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -7); // Start 7 days ago
+        
+        for (int i = 0; i < waterData.size(); i++) {
+            // Move to next day and create an intake at morning and evening
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+            
+            // Morning entry (25-50% of total)
+            Calendar morningTime = (Calendar) calendar.clone();
+            morningTime.set(Calendar.HOUR_OF_DAY, 9); // 9 AM
+            morningTime.set(Calendar.MINUTE, DemoDataProvider.getRandomInt(0, 59));
+            
+            float morningAmount = waterData.get(i) * (0.25f + DemoDataProvider.getRandomFloat(0f, 0.25f));
+            demoHistory.add(new WaterIntake(morningTime.getTime(), morningAmount, waterGoal));
+            
+            // Evening entry (remaining amount)
+            Calendar eveningTime = (Calendar) calendar.clone();
+            eveningTime.set(Calendar.HOUR_OF_DAY, 18); // 6 PM
+            eveningTime.set(Calendar.MINUTE, DemoDataProvider.getRandomInt(0, 59));
+            
+            demoHistory.add(new WaterIntake(eveningTime.getTime(), waterData.get(i), waterGoal));
+        }
+        
+        // Add today's entries
+        Calendar today = Calendar.getInstance();
+        
+        // Morning entry
+        Calendar morningToday = (Calendar) today.clone();
+        morningToday.set(Calendar.HOUR_OF_DAY, 9);
+        morningToday.set(Calendar.MINUTE, DemoDataProvider.getRandomInt(0, 59));
+        
+        float morningAmount = todayIntake * 0.5f;
+        demoHistory.add(new WaterIntake(morningToday.getTime(), morningAmount, waterGoal));
+        
+        // Current entry
+        demoHistory.add(demoDayIntake);
+    }
+    
+    private void showDemoToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     private void updateUI(boolean animate) {
-        WaterIntake waterIntake = waterViewModel.getCurrentWaterIntake().getValue();
+        WaterIntake waterIntake;
+        
+        if (isDemoMode) {
+            waterIntake = demoDayIntake;
+        } else {
+            waterIntake = waterViewModel.getCurrentWaterIntake().getValue();
+        }
+        
         if (waterIntake == null) return;
 
         float progress = waterIntake.getProgress();
@@ -138,7 +239,33 @@ public class WaterTrackingActivity extends AppCompatActivity {
         historyDisplayList.clear();
         historyDataList.clear();
         
-        List<WaterIntake> todayHistory = waterViewModel.getTodayHistory();
+        List<WaterIntake> todayHistory;
+        
+        if (isDemoMode) {
+            // Filter demo history to get today's entries
+            final Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+            
+            todayHistory = new ArrayList<>();
+            for (WaterIntake intake : demoHistory) {
+                Calendar intakeDate = Calendar.getInstance();
+                intakeDate.setTime(intake.getDate());
+                intakeDate.set(Calendar.HOUR_OF_DAY, 0);
+                intakeDate.set(Calendar.MINUTE, 0);
+                intakeDate.set(Calendar.SECOND, 0);
+                intakeDate.set(Calendar.MILLISECOND, 0);
+                
+                if (intakeDate.getTimeInMillis() == today.getTimeInMillis()) {
+                    todayHistory.add(intake);
+                }
+            }
+        } else {
+            todayHistory = waterViewModel.getTodayHistory();
+        }
+        
         if (todayHistory.isEmpty()) {
             historyDisplayList.add("No water intake recorded today");
         } else {
@@ -338,9 +465,19 @@ public class WaterTrackingActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.common_menu, menu);
+        return true;
+    }
+    
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
+            return true;
+        } else if (item.getItemId() == R.id.action_health_summary) {
+            Intent intent = new Intent(this, HealthDashboardActivity.class);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);

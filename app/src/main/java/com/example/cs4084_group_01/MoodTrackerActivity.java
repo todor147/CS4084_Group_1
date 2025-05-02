@@ -1,6 +1,8 @@
 package com.example.cs4084_group_01;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
@@ -141,9 +143,19 @@ public class MoodTrackerActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.common_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
+            return true;
+        } else if (item.getItemId() == R.id.action_health_summary) {
+            Intent intent = new Intent(this, HealthDashboardActivity.class);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);

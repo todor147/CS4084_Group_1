@@ -1,37 +1,49 @@
 package com.example.cs4084_group_01;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Toast;
+
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.button.MaterialButton;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import com.example.cs4084_group_01.manager.UserManager;
 import com.example.cs4084_group_01.model.User;
-import com.example.cs4084_group_01.model.Feature;
-import com.example.cs4084_group_01.adapter.FeaturesAdapter;
 
-public class DashboardActivity extends AppCompatActivity {
-    private TextView greetingText;
-    private TextView userNameText;
-    private RecyclerView featuresGrid;
+public class DashboardActivity extends BaseActivity {
+    private TextView welcomeText;
+    // Quick actions
+    private MaterialCardView healthDashboardCard;
+    private MaterialCardView workoutCard;
+    private MaterialCardView bmiCard;
+    
+    // Feature cards
+    private MaterialCardView healthDashboardFeatureCard;
+    private MaterialCardView stepCounterCard;
+    private MaterialCardView waterIntakeCard;
+    private MaterialCardView nutritionCard;
+    private MaterialCardView sleepCard;
+    private MaterialCardView moodTrackerCard;
+    private MaterialCardView workoutLoggerCard;
+    private MaterialCardView meditationCard;
+    private MaterialCardView progressCard;
+    private MaterialCardView userProfileCard;
+    private MaterialCardView campusGymCard;
+    private MaterialCardView dataExportCard;
+    private MaterialCardView settingsCard;
+    
+    private TextView bmiValueText;
+    private TextView bmiCategoryText;
+    private TextView bmiDetailsText;
+    private FloatingActionButton editProfileFab;
     private UserManager userManager;
-    private MaterialCardView quickActionWater;
-    private MaterialCardView quickActionSteps;
-    private MaterialCardView bmiDashboardCard;
-    private TextView bmiValueDashboard;
-    private TextView bmiCategoryDashboard;
-    private MaterialButton editProfileButton;
-    private MaterialButton workoutTrackingButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,16 +51,33 @@ public class DashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
 
         // Initialize views
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
-        greetingText = findViewById(R.id.greetingText);
-        userNameText = findViewById(R.id.userNameText);
-        featuresGrid = findViewById(R.id.featuresGrid);
-        quickActionWater = findViewById(R.id.quickActionWater);
-        quickActionSteps = findViewById(R.id.quickActionSteps);
-        bmiDashboardCard = findViewById(R.id.bmiDashboardCard);
-        bmiValueDashboard = findViewById(R.id.bmiValueDashboard);
-        bmiCategoryDashboard = findViewById(R.id.bmiCategoryDashboard);
-        workoutTrackingButton = findViewById(R.id.workoutTrackingButton);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        welcomeText = findViewById(R.id.welcomeText);
+        
+        // Quick actions
+        healthDashboardCard = findViewById(R.id.healthDashboardCard);
+        workoutCard = findViewById(R.id.workoutCard);
+        bmiCard = findViewById(R.id.bmiCard);
+        
+        // Features
+        healthDashboardFeatureCard = findViewById(R.id.healthDashboardFeatureCard);
+        stepCounterCard = findViewById(R.id.stepCounterCard);
+        waterIntakeCard = findViewById(R.id.waterIntakeCard);
+        nutritionCard = findViewById(R.id.nutritionCard);
+        sleepCard = findViewById(R.id.sleepCard);
+        moodTrackerCard = findViewById(R.id.moodTrackerCard);
+        workoutLoggerCard = findViewById(R.id.workoutLoggerCard);
+        meditationCard = findViewById(R.id.meditationCard);
+        progressCard = findViewById(R.id.progressCard);
+        userProfileCard = findViewById(R.id.userProfileCard);
+        campusGymCard = findViewById(R.id.campusGymCard);
+        dataExportCard = findViewById(R.id.dataExportCard);
+        settingsCard = findViewById(R.id.settingsCard);
+        
+        bmiValueText = findViewById(R.id.bmiValueText);
+        bmiCategoryText = findViewById(R.id.bmiCategoryText);
+        bmiDetailsText = findViewById(R.id.bmiDetailsText);
+        editProfileFab = findViewById(R.id.editProfileFab);
 
         // Set up toolbar
         setSupportActionBar(toolbar);
@@ -56,22 +85,22 @@ public class DashboardActivity extends AppCompatActivity {
         // Initialize UserManager
         userManager = UserManager.getInstance(this);
 
+        // Enable demo mode if this is first run
+        enableDemoModeIfFirstRun();
+
         // Update welcome message
         updateWelcomeMessage();
         
         // Update BMI display
         updateBMIDisplay();
 
-        // Set up features grid
-        setupFeaturesGrid();
-
-        // Set up quick actions
-        setupQuickActions();
+        // Set up card click listeners
+        setupCardClickListeners();
         
-        // Setup workout tracking button
-        if (workoutTrackingButton != null) {
-            workoutTrackingButton.setOnClickListener(v -> {
-                Intent intent = new Intent(this, WorkoutTrackingActivity.class);
+        // Setup edit profile button
+        if (editProfileFab != null) {
+            editProfileFab.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ProfileActivity.class);
                 startActivity(intent);
             });
         }
@@ -93,42 +122,114 @@ public class DashboardActivity extends AppCompatActivity {
             } else {
                 greeting = "Good evening";
             }
-            greetingText.setText(greeting);
             
             // Use name if available, otherwise use email
             String displayName = name != null && !name.isEmpty() ? name : email.split("@")[0];
-            userNameText.setText(displayName);
+            welcomeText.setText(greeting + ", " + displayName + "!");
         } else {
-            greetingText.setText("Welcome");
-            userNameText.setText("Guest");
+            welcomeText.setText("Welcome to FitTracker!");
         }
     }
 
-    private void setupFeaturesGrid() {
-        List<Feature> features = new ArrayList<>();
-        features.add(new Feature("Water Tracking", R.drawable.ic_water, WaterTrackingActivity.class));
-        features.add(new Feature("Step Counter", R.drawable.ic_directions_walk, StepCounterActivity.class));
-        features.add(new Feature("Mood Tracker", R.drawable.ic_mood, MoodTrackerActivity.class));
-        features.add(new Feature("Meal Tracker", R.drawable.ic_food, MealLoggerActivity.class));
-        features.add(new Feature("Health Summary", R.drawable.ic_health, HealthDashboardActivity.class));
-        features.add(new Feature("Profile", R.drawable.ic_person, ProfileActivity.class));
-        features.add(new Feature("Workout Tracker", R.drawable.ic_fitness, WorkoutTrackingActivity.class));
-
-        FeaturesAdapter adapter = new FeaturesAdapter(features, this);
-        featuresGrid.setLayoutManager(new GridLayoutManager(this, 2));
-        featuresGrid.setAdapter(adapter);
-    }
-
-    private void setupQuickActions() {
-        quickActionWater.setOnClickListener(v -> {
-            Intent intent = new Intent(this, WaterTrackingActivity.class);
-            intent.putExtra("quick_add", true);
+    private void setupCardClickListeners() {
+        // Quick Actions
+        
+        // Health Dashboard (Quick action)
+        healthDashboardCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, HealthDashboardActivity.class);
             startActivity(intent);
         });
 
-        quickActionSteps.setOnClickListener(v -> {
+        // Workout Tracking (Quick action)
+        workoutCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, WorkoutTrackingActivity.class);
+            startActivity(intent);
+        });
+
+        // BMI Calculator (Quick action)
+        bmiCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            intent.putExtra("open_bmi", true);
+            startActivity(intent);
+        });
+        
+        // Features
+        
+        // Health Dashboard Feature
+        healthDashboardFeatureCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, HealthDashboardActivity.class);
+            startActivity(intent);
+        });
+        
+        // Step Counter
+        stepCounterCard.setOnClickListener(v -> {
             Intent intent = new Intent(this, StepCounterActivity.class);
-            intent.putExtra("quick_view", true);
+            startActivity(intent);
+        });
+        
+        // Water Intake Tracker
+        waterIntakeCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, WaterTrackingActivity.class);
+            startActivity(intent);
+        });
+
+        // Meal Tracker
+        nutritionCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MealLoggerActivity.class);
+            startActivity(intent);
+        });
+
+        // Sleep Logger
+        sleepCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SleepTrackingActivity.class);
+            startActivity(intent);
+        });
+        
+        // Mood Tracker
+        moodTrackerCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MoodTrackerActivity.class);
+            startActivity(intent);
+        });
+        
+        // Workout Logger
+        workoutLoggerCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, WorkoutTrackingActivity.class);
+            startActivity(intent);
+        });
+
+        // Meditation Timer
+        meditationCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MeditationTimerActivity.class);
+            startActivity(intent);
+        });
+
+        // Goal Tracker
+        progressCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, HealthProgressActivity.class);
+            startActivity(intent);
+        });
+        
+        // User Profile
+        userProfileCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        });
+
+        // Campus Gym Status
+        campusGymCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CampusGymActivity.class);
+            startActivity(intent);
+        });
+        
+        // Data Export
+        dataExportCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ExportDataActivity.class);
+            startActivity(intent);
+        });
+        
+        // Settings
+        settingsCard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         });
     }
@@ -139,11 +240,14 @@ public class DashboardActivity extends AppCompatActivity {
             float heightInMeters = currentUser.getHeight() / 100f;
             float bmi = currentUser.getWeight() / (heightInMeters * heightInMeters);
             
-            bmiValueDashboard.setText(String.format("%.1f", bmi));
-            bmiCategoryDashboard.setText(getBMICategory(bmi));
-            bmiDashboardCard.setVisibility(View.VISIBLE);
+            bmiValueText.setText(String.format("%.1f", bmi));
+            String category = getBMICategory(bmi);
+            bmiCategoryText.setText(category);
+            bmiDetailsText.setText(getBMIDetailText(category));
         } else {
-            bmiDashboardCard.setVisibility(View.GONE);
+            bmiValueText.setText("0.0");
+            bmiCategoryText.setText("Not calculated");
+            bmiDetailsText.setText("Tap to calculate your BMI");
         }
     }
     
@@ -156,6 +260,21 @@ public class DashboardActivity extends AppCompatActivity {
             return "Overweight";
         } else {
             return "Obese";
+        }
+    }
+    
+    private String getBMIDetailText(String category) {
+        switch (category) {
+            case "Underweight":
+                return "Consider increasing caloric intake";
+            case "Normal weight":
+                return "Maintain your healthy lifestyle!";
+            case "Overweight":
+                return "Consider moderate diet changes";
+            case "Obese":
+                return "Consider consulting a health professional";
+            default:
+                return "Tap to calculate your BMI";
         }
     }
 
@@ -174,12 +293,45 @@ public class DashboardActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_logout) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_logout) {
             userManager.logoutUser();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return true;
+        } else if (itemId == R.id.action_health_summary) {
+            Intent intent = new Intent(this, HealthDashboardActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (itemId == R.id.action_export) {
+            Intent intent = new Intent(this, ExportDataActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (itemId == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Sets a flag indicating that the app is in demo mode
+     * Activities can check this flag to display sample data
+     */
+    private void enableDemoModeIfFirstRun() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isFirstRun = prefs.getBoolean("is_first_run", true);
+        
+        if (isFirstRun) {
+            // Enable demo mode for all features
+            prefs.edit()
+                .putBoolean("is_demo_mode", true)
+                .putBoolean("is_first_run", false)
+                .apply();
+                
+            // Show a toast indicating demo mode
+            Toast.makeText(this, "Demo mode enabled - sample data will be shown", Toast.LENGTH_LONG).show();
+        }
     }
 } 

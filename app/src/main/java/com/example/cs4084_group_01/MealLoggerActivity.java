@@ -1,7 +1,9 @@
 package com.example.cs4084_group_01;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -12,7 +14,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,7 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class MealLoggerActivity extends AppCompatActivity {
+public class MealLoggerActivity extends BaseActivity {
     
     private MealViewModel mealViewModel;
     private CalendarView calendarView;
@@ -264,9 +265,19 @@ public class MealLoggerActivity extends AppCompatActivity {
     }
     
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.common_menu, menu);
+        return true;
+    }
+    
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
+            return true;
+        } else if (item.getItemId() == R.id.action_health_summary) {
+            Intent intent = new Intent(this, HealthDashboardActivity.class);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);

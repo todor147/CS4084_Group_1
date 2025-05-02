@@ -6,7 +6,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -17,7 +16,7 @@ import com.google.android.material.card.MaterialCardView;
 import android.widget.TextView;
 import com.example.cs4084_group_01.model.User;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
     private ProfileViewModel viewModel;
     private TextInputLayout nameInputLayout;
     private TextInputEditText nameInput;

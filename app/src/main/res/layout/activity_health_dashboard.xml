@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -14,14 +15,17 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="Health Summary"
-            app:titleTextColor="@android:color/white"
+            app:titleTextColor="?android:attr/textColorPrimary"
             app:navigationIcon="@drawable/ic_arrow_back" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -34,8 +38,10 @@
                 android:id="@+id/todayDateText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Today's Health Summary"
-                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:text="Monday, April 14, 2025"
+                android:textAppearance="?attr/textAppearanceHeadline5"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginBottom="16dp" />
 
             <!-- Steps Card -->
@@ -44,21 +50,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:background="@drawable/steps_card_background">
 
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_directions_walk"
-                        app:tint="?attr/colorPrimary"
-                        android:layout_gravity="center_vertical" />
+                        app:tint="@color/steps_color"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/colorBackground"
+                        android:padding="8dp"
+                        android:elevation="2dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -70,6 +84,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Steps"
+                            android:textColor="@color/steps_color"
                             android:textAppearance="?attr/textAppearanceSubtitle1" />
 
                         <TextView
@@ -77,7 +92,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="24sp"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="28sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -85,6 +101,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Goal: 10,000 steps"
+                            android:textColor="?android:attr/textColorSecondary"
                             android:textAppearance="?attr/textAppearanceBody2" />
 
                         <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -92,7 +109,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:progress="0" />
+                            android:progress="0"
+                            app:trackCornerRadius="4dp"
+                            app:trackThickness="8dp"
+                            app:indicatorColor="@color/steps_color" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -103,21 +123,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:background="@drawable/water_card_background">
 
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_water"
-                        app:tint="?attr/colorPrimary"
-                        android:layout_gravity="center_vertical" />
+                        app:tint="@color/water_color"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/colorBackground"
+                        android:padding="8dp"
+                        android:elevation="2dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -129,6 +157,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Water Intake"
+                            android:textColor="@color/water_color"
                             android:textAppearance="?attr/textAppearanceSubtitle1" />
 
                         <TextView
@@ -136,7 +165,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0 ml"
-                            android:textSize="24sp"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="28sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -144,6 +174,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Goal: 2000 ml"
+                            android:textColor="?android:attr/textColorSecondary"
                             android:textAppearance="?attr/textAppearanceBody2" />
 
                         <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -151,7 +182,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:progress="0" />
+                            android:progress="0"
+                            app:trackCornerRadius="4dp"
+                            app:trackThickness="8dp"
+                            app:indicatorColor="@color/water_color" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -162,22 +196,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:background="@drawable/mood_card_background">
 
                     <ImageView
                         android:id="@+id/moodIcon"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_mood"
-                        app:tint="?attr/colorPrimary"
-                        android:layout_gravity="center_vertical" />
+                        app:tint="@color/mood_color"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/colorBackground"
+                        android:padding="8dp"
+                        android:elevation="2dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -189,6 +231,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Today's Mood"
+                            android:textColor="@color/mood_color"
                             android:textAppearance="?attr/textAppearanceSubtitle1" />
 
                         <TextView
@@ -196,6 +239,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="No mood recorded"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="24sp"
                             android:textStyle="bold" />
 
@@ -204,6 +248,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Last updated: -"
+                            android:textColor="?android:attr/textColorSecondary"
                             android:textAppearance="?attr/textAppearanceBody2" />
                     </LinearLayout>
                 </LinearLayout>
@@ -215,21 +260,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:background="@drawable/meals_card_background">
 
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_food"
-                        app:tint="?attr/colorPrimary"
-                        android:layout_gravity="center_vertical" />
+                        app:tint="@color/meals_color"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/colorBackground"
+                        android:padding="8dp"
+                        android:elevation="2dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -241,6 +294,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Today's Meals"
+                            android:textColor="@color/meals_color"
                             android:textAppearance="?attr/textAppearanceSubtitle1" />
 
                         <TextView
@@ -248,6 +302,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0 meals"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="24sp"
                             android:textStyle="bold" />
 
@@ -256,29 +311,301 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0 calories"
-                            android:textAppearance="?attr/textAppearanceBody2"
-                            android:textStyle="bold" />
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textAppearance="?attr/textAppearanceBody2" />
 
                         <TextView
                             android:id="@+id/mealsSummaryText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="No meals recorded today"
+                            android:textColor="?android:attr/textColorSecondary"
                             android:textAppearance="?attr/textAppearanceBody2" 
                             android:layout_marginTop="4dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Reset Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/resetButton"
+            <!-- Workouts Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/workoutsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reset Daily Stats"
-                android:layout_marginTop="16dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:background="@drawable/workouts_card_background">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_fitness_center"
+                        app:tint="@color/workouts_color"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/colorBackground"
+                        android:padding="8dp"
+                        android:elevation="2dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Today's Workouts"
+                            android:textColor="@color/workouts_color"
+                            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+                        <TextView
+                            android:id="@+id/workoutsCountText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 workouts"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/totalMinutesText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 minutes"
+                            android:textColor="@color/workouts_color"
+                            android:textAppearance="?attr/textAppearanceBody2"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/workoutsSummaryText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No workouts recorded today"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textAppearance="?attr/textAppearanceBody2" 
+                            android:layout_marginTop="4dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Meditation Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/meditationCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:background="@drawable/meditation_card_background">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_meditation"
+                        app:tint="@color/meditation_color"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/colorBackground"
+                        android:padding="8dp"
+                        android:elevation="2dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Today's Meditation"
+                            android:textColor="@color/meditation_color"
+                            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+                        <TextView
+                            android:id="@+id/meditationCountText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 sessions"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/totalMeditationMinutesText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 minutes"
+                            android:textColor="@color/meditation_color"
+                            android:textAppearance="?attr/textAppearanceBody2"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/meditationSummaryText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No meditation sessions today"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textAppearance="?attr/textAppearanceBody2" 
+                            android:layout_marginTop="4dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Sleep Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sleepCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:background="@drawable/sleep_card_background">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_sleep"
+                        app:tint="@color/sleep_color"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/colorBackground"
+                        android:padding="8dp"
+                        android:elevation="2dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sleep"
+                            android:textColor="@color/sleep_color"
+                            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+                        <TextView
+                            android:id="@+id/sleepDurationText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No sleep data"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/sleepQualityText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Quality: --"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textAppearance="?attr/textAppearanceBody2" />
+
+                        <TextView
+                            android:id="@+id/sleepTimeRangeText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Time: --"
+                            android:textColor="@color/sleep_color"
+                            android:textAppearance="?attr/textAppearanceBody2" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+    
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottomAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:hideOnScroll="true"
+        app:fabCradleMargin="10dp"
+        app:fabCradleRoundedCornerRadius="10dp"
+        app:backgroundTint="?attr/colorSurface">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/resetButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Reset Stats"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                app:icon="@drawable/ic_refresh"
+                android:textColor="?android:attr/textColorPrimary"
+                app:iconTint="?android:attr/textColorPrimary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/gymButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="UL Gym"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                app:icon="@drawable/ic_fitness_center"
+                android:textColor="?android:attr/textColorPrimary"
+                app:iconTint="?android:attr/textColorPrimary" />
+                
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/trackButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Goals"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                app:icon="@drawable/ic_track_changes"
+                android:textColor="?android:attr/textColorPrimary"
+                app:iconTint="?android:attr/textColorPrimary" />
+        </LinearLayout>
+
+    </com.google.android.material.bottomappbar.BottomAppBar>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Add Activity"
+        app:layout_anchor="@id/bottomAppBar"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/ic_add"
+        app:backgroundTint="?attr/colorPrimary" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 

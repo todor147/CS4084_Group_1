@@ -7,8 +7,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+                     android:maxSdkVersion="28" />
 
     <application
+        android:name=".HealthTrackerApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -65,14 +68,52 @@
             android:exported="false"
             android:label="Settings" />
         <activity
-            android:name=".WorkoutTrackingActivity"
+            android:name=".ExportDataActivity"
             android:exported="false"
-            android:label="Workout Tracker" />
+            android:label="Export Health Data" />
         <service
             android:name=".StepCounterService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="health" />
+
+        <activity
+            android:name=".WorkoutTrackingActivity"
+            android:exported="false"
+            android:label="Workout Tracker" />
+            
+        <activity
+            android:name=".MeditationTimerActivity"
+            android:exported="false"
+            android:label="Meditation Timer" />
+            
+        <activity
+            android:name=".SleepTrackingActivity"
+            android:exported="false"
+            android:label="Sleep Tracker" />
+
+        <activity
+            android:name=".HealthProgressActivity"
+            android:exported="false"
+            android:label="Health Goals"
+            android:parentActivityName=".HealthDashboardActivity" />
+            
+        <activity
+            android:name=".CampusGymActivity"
+            android:exported="false"
+            android:label="UL Sport Gym"
+            android:parentActivityName=".HealthDashboardActivity" />
+            
+        <!-- File Provider for sharing exported files -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

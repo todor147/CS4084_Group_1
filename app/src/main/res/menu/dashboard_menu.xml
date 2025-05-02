@@ -2,6 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_health_summary"
+        android:title="Health Summary"
+        android:icon="@drawable/ic_health"
+        android:orderInCategory="80"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_settings"
+        android:title="Settings"
+        android:icon="@drawable/ic_settings"
+        android:orderInCategory="85"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_export"
+        android:title="Export Data"
+        android:icon="@drawable/ic_notification"
+        android:orderInCategory="90"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/action_logout"
         android:title="Logout"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"

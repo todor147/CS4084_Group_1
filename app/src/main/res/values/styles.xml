@@ -4,4 +4,10 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+    
+    <!-- Light theme floating action button style -->
+    <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">@color/purple_500</item>
+        <item name="tint">@color/white</item>
+    </style>
 </resources> 

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Export Health Data"
+            app:titleTextColor="@android:color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Introduction -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Export your health data as a JSON file. You can choose what data to include:"
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="@color/primary_text"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Data Selection -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="@drawable/card_background">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Data to Include"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textColor="@color/primary_text"
+                        android:layout_marginBottom="16dp" />
+
+                    <CheckBox
+                        android:id="@+id/cb_user_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="User Profile Data (height, weight, BMI)"
+                        android:textColor="@color/primary_text"
+                        android:checked="true"
+                        android:layout_marginBottom="8dp" />
+
+                    <CheckBox
+                        android:id="@+id/cb_activity_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Activity Data (steps, workouts)"
+                        android:textColor="@color/primary_text"
+                        android:checked="true"
+                        android:layout_marginBottom="8dp" />
+
+                    <CheckBox
+                        android:id="@+id/cb_nutrition_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Nutrition Data (water intake, meals)"
+                        android:textColor="@color/primary_text"
+                        android:checked="true"
+                        android:layout_marginBottom="8dp" />
+
+                    <CheckBox
+                        android:id="@+id/cb_wellbeing_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Wellbeing Data (mood, sleep)"
+                        android:textColor="@color/primary_text"
+                        android:checked="true" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Export Options -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="@drawable/card_background">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Export Options"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textColor="@color/primary_text"
+                        android:layout_marginBottom="16dp" />
+
+                    <RadioGroup
+                        android:id="@+id/rg_export_action"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <RadioButton
+                            android:id="@+id/rb_save"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Save to device storage"
+                            android:textColor="@color/primary_text"
+                            android:checked="true"
+                            android:layout_marginBottom="8dp" />
+
+                        <RadioButton
+                            android:id="@+id/rb_share"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Save and share immediately"
+                            android:textColor="@color/primary_text" />
+
+                    </RadioGroup>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Privacy Note -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Note: The exported file may contain personal information. Please be careful when sharing it."
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="@color/secondary_text"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Export Button and Progress Bar -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/btn_export"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Export Data"
+                    android:textAllCaps="false"
+                    android:padding="16dp" />
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout> 

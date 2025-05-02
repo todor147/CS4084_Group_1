@@ -299,4 +299,92 @@ separation of concerns:
 - Source code with proper documentation
 - APK file
 - User guide
-- Technical documentation 
+- Technical documentation
+
+# FitTracker Health App
+
+An Android application for tracking various health metrics, including steps, water intake, mood, meals, workouts, meditation, and sleep.
+
+## Project Structure
+
+The application follows a clean architecture pattern with the following components:
+
+### Core Components
+
+- **Activities**: User interface screens (`DashboardActivity`, `HealthDashboardActivity`, etc.)
+- **Models**: Data classes (`User`, `StepData`, `WaterIntake`, etc.)
+- **ViewModels**: Manage UI-related data and business logic
+- **Repositories**: Data access layer for persistence
+- **Utils**: Helper classes and utilities
+
+### Features
+
+1. **User Management**
+   - Login/Registration
+   - Profile Management (height, weight, BMI)
+
+2. **Health Tracking**
+   - Step Counter
+   - Water Intake Tracking
+   - Mood Tracking
+   - Meal Logging
+   - Workout Tracking
+   - Meditation Timer
+   - Sleep Tracking
+
+3. **Data Analysis**
+   - Health Dashboard
+   - Progress Tracking
+   - Goal Setting
+
+4. **Data Export**
+   - JSON export of all health data
+   - Save to device storage
+   - Share functionality
+
+## Data Export Feature
+
+The health data export feature allows users to:
+
+1. **Select Data Categories**:
+   - User profile data
+   - Activity data (steps, workouts)
+   - Nutrition data (water, meals)
+   - Wellbeing data (mood, sleep)
+
+2. **Export Options**:
+   - Save to device storage
+   - Save and share immediately
+
+3. **Output Format**:
+   - JSON file with organized data structure
+   - Timestamp and metadata
+
+4. **Access Points**:
+   - Main Dashboard menu
+   - Health Dashboard menu
+
+## File Organization
+
+- **`app/src/main/java/com/example/cs4084_group_01/`**: Core application code
+  - **`model/`**: Data classes
+  - **`repository/`**: Data access layer
+  - **`viewmodel/`**: ViewModels for UI state management
+  - **`util/`**: Utility classes
+  - **`*.java`**: Activity classes
+
+- **`app/src/main/res/`**: Resources
+  - **`layout/`**: UI layouts
+  - **`drawable/`**: Graphics and icons
+  - **`values/`**: Colors, strings, styles
+  - **`menu/`**: Menu definitions
+  - **`xml/`**: XML configurations
+
+## Permissions
+
+The application requires the following permissions:
+
+- `ACTIVITY_RECOGNITION`: For step counting
+- `FOREGROUND_SERVICE`: For background step counting service
+- `POST_NOTIFICATIONS`: For notifications
+- `WRITE_EXTERNAL_STORAGE`: For exporting data (Android < 10) 
